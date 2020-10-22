@@ -115,3 +115,6 @@ Hmmm... Now I need a way of iterating over the larger structure... It seems spli
 much cleaner solution to this problem... What do I want to do? It seems there's an issue since the number of transpositions necessary to complete a a cycle doesn't always correspond
 with the number of chords per measure (i.e. 3 tranpositions v.s. 7 chords per measure)... how do I compactly represent this information in a loop?  I'll also have to change the 
 measure which is being updated each time...
+
+10/22/2020
+Hmm... Okay.. What do do next... Well where was I with this project to begin with? 
