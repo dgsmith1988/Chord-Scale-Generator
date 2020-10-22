@@ -1,0 +1,117 @@
+08/28/2018
+What to do regarding software for generating voice-leading patterns? Hmm... What is it I really want here...? I want to give the software a voicing and cycle pattern (i.e. 7/2, 4/5, or
+3/6) and have it generate the corresponding chord progressions in all the keys. What about restricting things based on the layout of the guitar neck? Should I apply some sort of rules
+based on which string set the exercise is to be done on? Hmm... It would be simple enough to generate the pattern and then transpose chords down or up an octave if they're out of range
+of the strings in the set that has been selected. The ranges might move around a bit depending on the voicings selected... hmm... how do we cycle through the voicings? How is the next
+note selected each time? Hmm... That will depend on which type of cycle you're using.
+
+7/2 cycle - move all the notes
+5/4 cycle - move two of the notes
+6/3 cycle - move one of the notes
+
+The exact details can be worked out more once you get a few examples on paper to work through...
+
+How do I define the set of available notes to use so this can facilite using the melodic minor/harmonic minor scales (and any of the other modes potentially)? You could use an ordered
+data structure. There might be something in music21 which already facillitates this.
+
+Hmm... What was the logic behind the patterns Chris began with? Hmm... Well looking at the scores it looks like one way was descending of the two but the other was ascending in general
+
+Cycle 2:Descending	-	Cycle 7:Acsending
+Cycle 4:Ascending	-	Cycle 5:Descending
+Cycle 3:Descending	-	Cycle 6:Ascending
+
+Hmm... Why would the directions cycles switch based on the 4/5 pairing? Hmm... I'm not sure I understand the inital logic of the chord progressions themselves enough to see it right now.
+Hmm... I think that's just a quirk of the relationship between chords a 4th apart... Especially if you hold common tones and move... But why...? What are the notes involved in terms
+of scale degree functions...
+
+I = 1 3 5
+ii = 2 4 6
+iii = 3 5 7
+IV = 4 6 1
+V = 5 7 2
+vi = 6 1 3
+vii = 7 2 4
+
+1-w-2-w-3-h-4-w-5-w-6-w-7-h-8
+
+Hmm... Yeah I don't think it has to do with the diatonic order directly... but just looking at the scale degrees involved in spelling the tones are very closely related... 1 chord one
+is common and the other two are only a step away... I'll just leave that to be a quirk of the system for now as I've got other things to take care of... What was I doing again? Yes...
+what are the rules which will govern how the different cycles operate in terms of note movement... Cycle 3/Cycle 6 seem easiest as only one note moves at a time... Hmm... I wonder if
+there's some sort of chord comparsion function provided in the music21 library which would allow me to do that automatically...
+
+Cycle 3 Pattern:	Bottom note moves down one scale degree (is that the right term? look this up later...)
+					Middle note moves down one scale degree
+					Top note moves down one scale degree
+					This pattern looks like it repeats (I'm too lazy to check every single chord change...)
+Cycle 6 Pattern:	Top note moves up one scale degree
+					Middle note moves up one scale degree
+					Bottom note moves up one scale degree
+					There are no leaps beyond a step in any of the voice leading lines (beyond the tranposition when things go out of range)
+Cycle 4 Pattern:	Bottom note is held, top and bottom voices move up one scale degree
+					Middle note is held, top and bottom voices move up one scale degree
+					Top note is held, middle and bottom voices move up one scale degree
+Cycle 5 Pattern:	Top note is held, middle and bottom voices move down one scale degree
+					Middle note is held, top and bottom voices move down one scale degree
+					Bottom note is held, top and middle voices move down one scale degree
+Cycle 2 Pattern:	Top and middle notes move down one scale degree, bottom note moves down two scale degrees
+					Top and bottom voices move down one scale degree, middle voice moves down two scale degrees
+					Middle and bottom note move down one scale degree, top voice moves down two scale degrees
+Cycle 7 Pattern:	Middle and bottom voices move up one scale degree, top voice moves up two scale degrees
+					Top and bottom voices move up one scale degree, middle voice moves up two scale degrees
+					Top and middle voices move up one scale degree, bottom moves up two scale degrees
+					
+Hmm... I think I've got a good start here... It's time to get the code up and running to see what I can do and if I was right...
+
+Hmm... Do I do this with chord or scale objects...? Let's take a look to see what the difference is... Hmm... It seems the best way to do this (at least following the method I have in
+mind) is to use the scale object and use it to generate notes...??? Hmm... How do I do this? Extract a pitch each time? Have three separate objects? Have something keeping track of
+each different voice...? Is there a method to take a pitch from a class and then have it remember it's part of a set of pitches from a scale? Hmm... IIRC the scale objects are formed
+by a set of intervals or Interval Network.... Hmm... Was that a concrete or abstract scale? I would need a concrete scale as there would be a key... It appears as if the next() function
+will allow me to do this...
+
+Hmm... Would it be better to keep track of all the pitches in a chord object? Also will the pattern that the voices move stay the same depending on the voicing? I think not, the
+relationships are more based on the tonal functions of the notes in each chord. How will I be able to do this more systematically and using music theory more than identifying patterns
+... Although I'd bet the same patterns of note movement apply based on which part of the chord each note is (i.e. the 3rd always follows the same path but it changes by octave)...
+I'll have to have some way of indicating which notes are moving each time and by how much... some sort of data structure which keeps track of the number of scale degrees to change
+for each note...
+
+Also, how do I store all the cycles and chords generated? hmm... it seems like this is something I could do easily with chords... although I could create a new chord with the new set
+of pitches each time... hmm... But then if I modify the pitches would that modify the chord...? I can't remember exactly how music21 handles storing copies of things... I believe it
+was a bit unorthodox and I'm not sure I fully understand their reasoning... I'll have to look into this...
+
+Hmm... How is it that music21 stores it's stuff again...? everything is a stream? I'll need to make several measures (in 7/4) and then have those in a larger stream...
+
+09/03/2018
+What about 7ths and 6th chords? Adding another scale degree will add another voice to follow and (correspondingly have another path to deduce)... What about the harmonic minor/melodic
+minor scales? Hmm... since we're dealing with tertiary harmony (although sus2 and sus4 chords will be slightly different...) and the harmonic movement is based on the relationships of
+the scale degrees, as long as we have a data structure which keeps track of the scale degrees/note ordering properly (and keep it just to diatonic scales atm) then the actual scale
+structure shouldn't be necessary to worry about... the system will take care of itself. I'll just have to work through one example with 7th chords in order to figure out the path for
+each note (6ths can be added later as after learning 7ths it would proabably be easy to pick them out on the fly).
+
+Hmm... What to do now... Is there any good software out there that could help me keep track of the tasks I have left to do? Well what is it that I have to do? Hmm... I still need to
+explore the music21 library to figure out the best way to implement the ideas I have here... Hmm... it looks like creating a chord each time would be best... It doesn't look like 
+there are any easy ways to quickly modify the notes of a chord...
+
+12/12/2018
+Hmm... It's been awhile but I think what is necessary is to create something which keeps track of an ordered set of pitches (i.e. a concrete scale object) and then have three different
+"pitch pointers" so to speak... these data structures will represent the pitches as they move throughout the scale... I'm not sure how the exact details work but I have a good rough
+idea... let's first try and create this and build from there...
+
+what do i want in a pitch pointer? it keeps track of the index in the larger structure of what pitch to select... what if I go backwards? where do i start within the scale to make
+sure I have enough room... hmm... what about using the scale.next() method...? is there a corresponding ".previous()" method? there is!!! praise jebus!!! I really need to experiment
+more with using this and the scale object, also... what about what note do I start on? Ultimately this will be determined by the string set being used but for now I can just use
+any starting pitch and then adjust this later...
+
+ConcreteScale.next(pitchOrigin=None, direction='ascending', stepSize=1, getNeighbor=True)
+
+That is the function we want...
+
+12/13/2018
+Hmmm... How do I store the information which dictates the way each note should move in a compact/easily accessible form? How will this be used? There will be an integer associated with
+each chord tone that will be passed to the .next() function. When 4-note chords are added, this will have to be expanded slightly... For now don't worry about that and just focus on
+getting the triads working correctly... What type of data structure would be best here? Hmm... This is really a choice based on my comfort/familiarity with Python... A 3x3 matrix would
+probably do it...  3 entries in each row for each chord tone, and 3 columns as there are 3 steps until the pattern repeats...
+
+Hmmm... Now I need a way of iterating over the larger structure... It seems splitting up the loops as I have done will create a lot of unecessary corner cases... I believe there is a
+much cleaner solution to this problem... What do I want to do? It seems there's an issue since the number of transpositions necessary to complete a a cycle doesn't always correspond
+with the number of chords per measure (i.e. 3 tranpositions v.s. 7 chords per measure)... how do I compactly represent this information in a loop?  I'll also have to change the 
+measure which is being updated each time...
