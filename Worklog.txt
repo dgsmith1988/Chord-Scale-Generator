@@ -117,4 +117,167 @@ with the number of chords per measure (i.e. 3 tranpositions v.s. 7 chords per me
 measure which is being updated each time...
 
 10/22/2020
-Hmm... Okay.. What do do next... Well where was I with this project to begin with? 
+Hmm... Okay.. What do do next... Well where was I with this project to begin with? Hmm... When I type show something pops up but it disappears quite quickly... Hmm... Perhaps it has to
+do with my music21 configuration... Hmm... it might be worth updating my music21 libary to make sure I have the latest code... They seem to have added a lot of things which could be
+useful... Hmm... So the music is displaying now, that is useful... Hmm... Okay... What is this and how is it useful? It looks like this is a cycle two ascending... Why is that? I mean
+I shoudl go back through it and see what's up to make sure I'm identifying it correctly... Hmm... It looks like a cycle two but I'd have to learn the properties of a cycle two to be
+more sure of what it is I'm looking at... Hmm... What was the goal here again? It has been awhile since I worked on this... Ahh... I want it to generate all the different progressions
+in any key. Ahh... And then if memory serves correctly there are ways of linking the various cycles together... I can work on imposing the various restrictions regarding the string
+changes after I get the basic stuff working... Hmm... What is it I want to do here? Hmm... Let's get a full cycle generated...
+
+Hmm... this seems to have gotten more complicated... What I need to be able to do is figure out how to generate the next chord in the cycle and move it up and octave... Hmm... Yes...
+My thinking just changed a bunch here... there's no point in doing it this way... I think what I could do is create functions to generate these various aspects... Hmm... Yeah, you could
+pass it a starting chord and a cycle type and it would generate the corresponding cycle. This would be a lot easier and cleaner. From there if I wanted to generate the whole thing I'd
+need to just do it by generating another progression but using the chord inversion i'm interested in to start with...
+
+10/26/2020
+So I'll work on developing the code to generate one complete cycle from a given chord... Hmm... Yes I reckon I definitely need to start on the tonic chord. That makes a lot of sense 
+here... Hmm... what exactly does this matrix represent again? Got it... Hmm... so how do we generate the different notes here? Ahh... I need to manipulate the "pitch pointers" to generate
+each of the different chords I'm looking for...  Hmm... I believe I could write these loops a lot cleaner based on the more powerful python iteration methods... So what is it I do now?
+I use the cycle matrix to generate the different chords I'm looking for based on the starting_chord. So I take... Hmm... so I also need a way of making sure that the pitch order as
+well as the element in each of the elements in the cycle matrix are changed... Hmm... Interesting... I believe there's a way to traverse both at the same time in Python... Hmm... I'm not
+sure what's going on here... It might be worth creating a new data structure in here to copy the chord tones into... Hmm... That seems like it might do the trick... Hmm... is there a
+way in music21 to convert a chord to a list of pitches?
+
+Son of a bitch... it looks like there's another set of patterns for the different starting chords? or is there? I think i was able to generate a 21 chord sequence before... I'm not 
+sure why I wouldn't be able to now...
+
+10/28/2020
+Hmm... okay... So these are all definitely permutations of the same matrix I believe... Hmm... so I believe this is correct... I'll need to test it out starting on the first inversion
+chord... Hmm... I'm not sure if I'm liking this documentation here... There should be... Ehh... This works for now... Hmm... What is the next step? It would be nice to make sure this 
+works in all keys. Hmm... I'd also need the functionality in place which makes it I can generate chord scales regardless of what 
+
+Functionality Required:
+ - Generate chord scales for arbitrary keys
+ - Adjust chord scales to fit the ranges for particular sets of strings
+ - Generate chord scales for major/harmonic/melodic keys
+ - Geneate chord scales for the following cycles - done
+	cycle 2
+	cycle 7
+	cycle 4
+	cycle 5
+	cycle 3
+	cycle 6
+ - Generate chord scales for arbitrary voicings (drop 2 and drop 3)
+ - Generate chord scales for 7th chords
+ 
+Hmm... So what should I do next? I'll clean this code up a bit... I should make sure I'm doing things as efficiently as possible... The first part would be to change these matricies
+so they're just permutations of the first one... Hmm... I might even be able to generate the cycle 7 matricies as permuations of these... better not optimize too much at the moment...
+Hmm... so i've got that part down... now let's focus on getting the other cycles in place... cycle 7 seems like the next best place to start
+
+10/29/2020
+Okay, lets work on getting the cycle 3 and cycle 6 chords generated... Hmm... A lot of this all depends on how you define what a cycle is. Is a cycle one smaller 7 chord sequence or
+is this more something elaborate? Like we get all the way back to a root position triad for the starting point...? Hmm... Interesting question... I can contemplate that more later
+after I figure out these basic cycle sequences... Hmm... Looks like I've got all the various cycles down... Lets take a look and refactor this into something we can use for the various
+other parts. Hmm... How should this work? I could take all these various constituent functions and data structures and put them in a module. From there I can create a script which 
+calls and uses the functions accordingly. That makes a lot of sense to me... Hmm... that's an interesting question... Will the cycle matrices stay the same for the harmonic and melodic
+minor variants? I'm tempted to say yes as this is all based on tertian harmony and the movement of the various scale degrees. If those scales are harmonized in thirds and then the corresponding
+notes are moved accordingly I think it would be similar... Hmm... It would be fairly simple to try, however I unfortunately don't have a set of written out examples to compare it to...
+However I would be able to do this fairly easily from a music theory standpoint... Hmm... However... Before I get too far into it, it would be worth making sure that I'm doing things
+correctly from the standpoint of music21 before I make this thing any larger... Hmm... It would also be useful to generate the full "21" chord cycles from one function call... Hmm...
+These are good tasks to focus on while I'm building these things up...
+
+10/30/2020
+Okay... Let's work on developing these chord scales for different voicings... Lets tackle the drop 2 voicings first... Hmm... How do I do this? Might it be easier just to take one of
+the pre-configured/generated scenarios and then just take one the middle note and move it down an octave? Hmm... How would I go about doing that? I would need to go through each measure
+and each chord and get the middle note of each chord and move it down... Hmm... Or I could attempt to use a different starting pitch and then change the different cycle matricies around...
+I mean both options seem equally valid... Although it might be easier to try and move the matricies around first... Hmm... I think it would work... I would just have to match things 
+so the rows would correspond to the same starting scale degree... Would that necessarily be easier than just going through all the chords in a sequence and moving a voice down an octave?
+I think not... Hmm... Especially as we could make a function to do that and then pass a parameter to determine what note is transposed down an octave... That honestly seems like a much
+better approach to this... Although it would be worth cleaning things up and encapsulating some of the functionality here a bit better... hmm... how do I do this? have several calls 
+to generate_cycle I would reckon... 
+
+Hmmm... So what is meant by a full cycle here? This would be a complete cycle of 21 chords without any sort of tranposition between the chords. Hmm, it's probably better to pass a string
+which indicates the cycle type... Hmm... This is a bit messy as some of the patterns deviate a bit... hmm... I still need to make the cycle 6 chords however... Hmm... However there 
+are the two different ideas here of a cycle. Like you can have a full cycle for cycle 2 developed and then there's a cycle 7 which comes afterwards to make a whole complete exercise
+in both directions... That would be interesting... so what do I call these two ideas? There are "full cycles" as well as "full exercises"? Hmm... I'm not sure if that's the best name
+for these things but it's definitely a start... Hmm... is there some sort of a programming construct which could be applied here? It seems a bit redundant to go ahead and complete a
+bunch of other if statements again... although that's all I have in mind at the moment... well this is a first draft so it's likely to be changed a whole bunch in order to figure things
+out... hmm... what is it i'm trying to do here? I want to be able to select which matrix is passed each time... hmm... another layer of indirection might help here but i'm not sure
+how useful it would be... unfortuantely it's not as simple as selecting just one variable type... Hmm... however... I could make a multidimensional list... I mean I've already created
+a multidimensional list but this would be a three dimensional list... Hmm... although if all the permuations as based on one matrix and they're the same for the two large classes of 
+cycles then I'd be able to use that information to generate what i need...
+
+10/31/2020
+Hmm... So how do I create a three dimensonial list here? Hmmm... how do I construct this? Do I create an empty list or is this something which can be dynamically generated? Hmm...
+Interesting question... Hmm... so it looks like I've figured out how to organize these... I'll do them in isolation and then integrate everything into the main code base... Hmm... 
+What would be the advantage to using numpy arrays here? Well it might be easier to encode these matricies using actual matricies... Plus it would be easier to perform all these different
+operations on each matrix based operations I reckon... Hmmm... I should just open it up and try and do that... 
+
+Hmm... Yes, I'm liking numpy quite a bit more here for the arrays. However, hmm... how do I do this? Do I define all the cycle 7 matrixes based on what the initial cycle 2 ones were
+or do I do it based on the initial cycle 7 matrix? Hmm... I mean this one is definied by the cycle 2 in it's own way. Roughly speaking what you have is several different permutations
+of the same rows. Hmm... I could see it being done either way... Although it might be nice to have the cycle 7 one listed out explicitly... However if there are any changes to the 
+cycle 2 matrix then it would be nice to have these propagate throughout the rest of the system... But the odds of it changing are relatively small to begin with... I mean it would be
+interesting to note the relationship exactly between the cycle 2 and cycle 7 matricies however it seems like it's something that can be explore much later on...
+
+Hmm... Okay... Now that I have these new data structures representing the matricies I need to figure out how to integrate them into the rest of the system...
+
+Hmm... What to do for this next? I need to figure out how to iterate through these data structures so I can incorporate them into the rest of the program I wrote... Hmm... I think I
+might be able to use the exact same program... I'm not sure how many modifications are needed... Hmm... it seems as if they fit quite nicely... 
+
+So how do we do this full cycle thing? Is there a way to check which data structure was passed? Hmm... Well there is a nice comparison function for the whole array... how are these
+results then interpreted?
+
+11/01/2020
+Hmm... Okay, what's the next step? Well let's straighten out the full_cycle generation function so that it starts at one octave and then doesn't need to be adjusted at all... It should
+be one continuous cycle that is then adapted/adjusted based on the range needs of whatever instrument is it being played on (or whatever the constraints that need to be added are).
+Hmm... I'm not entirely sure how this inversion function works... I should look into this... Hmm... The inversions seem to be done based on moving the notes up an octave. Hmm... I 
+mean that makes sense to an extent as that's how things are traditionally taught... However it would be a nice feature if you could say which way you want to achieve the inverison...
+By that I mean which direction you want the notes to go. It doesn't seem to try and find the easiest path in terms of inversion generation... Although this doesn't really explain
+why I'm getting massive octave jumps here... I'll have to use a breakpoint to figure it out... ahh, I see why these inversions are being created like this... Hmm... Perhaps generating
+the sub-cycles isn't the best approach here... It might be to iteratively apply the cycle matrix, or it might be easier to pass deep copies so this situation doesn't arrive... Hmm...
+how do I do this in a way though where I don't modify the originally passed chord? Hmm... Although that's an intersting question... Is that what I want? I mean it would be nice to do
+that and have it so there's no modification to the passed chord... Although... Hmm... I wonder why they do things in this manner? I can see how it might be better to be able to make
+an adjustment to one object and since everything is a reference then everything else would adjust accordingly... That might make it a bit tricky in larger programming contexts however...
+Hmm... yes... it appears the deep copy method worked... What to do next? I would like to be able to generate the ascending and descending pairs like in the Chris Buono exercises...
+
+So this would be a function which generates an ascending cycle followed by a descending cycle. the three different types are:
+ - cycle 2/7
+ - cycle 4/5
+ - cycle 3/6
+ 
+Hmm... this is where the Buono examples break down as they were designed to be played all over the guitar neck... Hmm... the nature of the cycles will become more evident as I generate
+these different exercises but for the 3/6 ones it looks like you start at one octave and then end on another... it would be worth exploring the other cycle pairings hmm... this is what
+i thought might happen... i need to figure out how to append these various cycles together on a measure basis... hmm... I would need to learn the various heirarchies of the stream,
+measure, part and all that in order to figure out how these things work... Hmm... it might be better to change the other storage types to streams... or perhaps a list of measures...
+I'm not entirely sure... That would be something which would be interesting and worth investigating...
+
+11/02/2020
+Hmm... I need to be able to indicate that these are measures of 7/4. How do I do that? That would likely be in the subcycle function... Hmm... It might be good to develop a test module...
+Essentially just a collection of tests on the various pieces of functionality here... Hmm... Theoretically I should just be able to iteratively apply these matricies... That would make
+things a whole lot easier for being able to generate one particular "full cycle" meaning a 21 chord sequence which follows the same progressions... Hmm... do these patterns which I noted
+before apply every time? I think so... In fact it would be easier to do it without having to deal with the inversions as it will make the code more consistent across different voicings...
+Hmm... Although here it would be useful to operate on the chord which has been passed so after the cycle has been done in one direction then you just take that same chord and feed it
+as the starting parameter to the next one... hmm... Yeah, I'm fairly certain that will work...
+
+Hmm... This is an interesting puzzle, the tricky part will be figuring out how to translate this into a loop...
+Hmm... If I append a time signature of 7/4 to the stream, will everything take care of itself basically?
+
+Hmm... I think the best way to do this would be to create a larger loop which handles the total number of chords for the iteration and then... hmm... so 0-20 will be 21 iterations...
+we want 20 so I should go 0 to 19... I was wrong there... 0 to 20 is what we want as the end isn't included
+
+Hmm... What about the ending chord? How do we want to do this? I'm not sure if the chord itself is used/modified... it most definitely is not as we first turn it into a list of pitches
+and then begin modifying it... hmmm... how ever it each of those pitches are referenced in the original chord structure then what's up with that...? Hmm... well what we do is completely
+change the chords in the list...
+
+Hmm... I'm not sure what to do for now... I can always go back and change things... it would also definitely be super useful to encapsulate this "row" functionality... in terms of 
+applying a row to a chord as a list... Hmm... I wonder why the extra treble clefs are being added... Hmm... this is a fairly small issue and can be dealt with later... the core of
+the functionality is there that i need and i can develop all the rest of what i'm working on here...
+
+11/04/2020
+Hmm... It definitely seems like the basic cycle pairs have come out correctly. Okay.. What's the next step? I think the next step would be to generate these for different chord voicings.
+Hmm... How would that necessarily differ? I mean the same relationships in terms of the movement of each voice would be the same I think. What is iddferent is identifying the starting
+note of each "row". Or each chord perhaps is a better way to put it... Let's write one out to make sure you see how it works... Hmm... What does this effectively change to? Ahh... In 
+terms of the matrix operations this can be acheived by swapping columns. And this makes sense as each column represents the relative position vertically of each note. Each row represents
+the motion of the tone in each transition. Hmm... How would I acheive this more easily? Also, what about the drop 2 and drop 3 voicings. Hmm... I don't see any harm in necessarily 
+creating drop 3 triads... Hmm... Although forming the various inverions here would be difficult. Hmm... That might be why they're not used as much... Or it might be why they're not
+labeled in the same way. If I did this, all I would get is the same thing but with a note an octave down. Hmm... Although it makes sense in a certain way. You don't use the same rules
+as for the closed voicings since you have compound intervals. However if you have a "seed triad" and then generate the voicings from them by moving each note to the next chord tone 
+ascendingly then you can generate the voicings in a similar manner. Hmm... Interesting... Especially interesting as since the chord tones appear in the same order, just with an octave
+in between them, theoretically I could use the same cycle matrix to generate them. Hmm... yes, I see why this wouldn't work. It might be necessary to generate them intervallically.
+Hmm... Although where do you stop... I mean you could also generate voicings by adding another octave between any of the notes... Hmmm... I mean theoretically you would have a "raise
+1" if you went the other route and had the octave added to the G. Hmm... I mean it's not as if these voicings aren't necessarily useful... However... Hmm... Yes, these are interesting...
+exercises... I especially like how they sound on my acoustic... However unfortunately it seems as if my acoustic needs a bit of work... Hmm... So this seems to have worked... Interesting...
+I wonder if the same rules regarding the inversions for reversing the cycles applies. This is quite possible. If so I would be able to darastically change some of the functions and make
+things a whole lot more efficient... Hmm... Man, I could save a lot of time here by just applying the column swapping matricies based on the permulations of the identity matrix. Although
+I would need to tranpose it first as the permutation matricies only apply to row operations it seems. How do these apply to three dimensional matricies?
