@@ -158,7 +158,7 @@ Functionality Required:
 	cycle 5
 	cycle 3
 	cycle 6
- - Generate chord scales for arbitrary voicings (drop 2 and drop 3)
+ - Generate chord scales for arbitrary voicings (drop 2 and drop 3) - done
  - Generate chord scales for 7th chords
  
 Hmm... So what should I do next? I'll clean this code up a bit... I should make sure I'm doing things as efficiently as possible... The first part would be to change these matricies
@@ -280,4 +280,86 @@ Hmm... Although where do you stop... I mean you could also generate voicings by 
 exercises... I especially like how they sound on my acoustic... However unfortunately it seems as if my acoustic needs a bit of work... Hmm... So this seems to have worked... Interesting...
 I wonder if the same rules regarding the inversions for reversing the cycles applies. This is quite possible. If so I would be able to darastically change some of the functions and make
 things a whole lot more efficient... Hmm... Man, I could save a lot of time here by just applying the column swapping matricies based on the permulations of the identity matrix. Although
-I would need to tranpose it first as the permutation matricies only apply to row operations it seems. How do these apply to three dimensional matricies?
+I would need to tranpose it first as the permutation matricies only apply to row operations it seems. How do these apply to three dimensional matricies? Hmm... It doesn't seem like
+that is necessary really... I can just change the order of matrix multiplication in order to achieve this.
+
+11/08/2020
+Okay... So how to modify the code to generate the various other parts... By that I mean how do I modify the code in order to make it so I can generate the cycle pairs using the swapped
+matricies more easily? Hmm... Adding a flag to trigger the drop 2 aspect would be a good way. Hmm... Why is this Ab showing up as as G#? That shouldn't be... Is this a music21 problem
+or a MuseScore problem? Hmm... This seems to be a bug within the music21 library itself... Calling transpose(0) turns the Ab into a G#. This should not be... Deep copy seems to be a 
+better way of handling this... Hmm... I mean strictly speaking this did give me the melodic minor harmonization in a way (there is different behavior when the scale is ascending compared
+to when it is descending). I wonder why this didn't occur with the harmonic minor scale... That's a good question... 
+
+11/09/2020
+Hmm... Is there a way to create your own scales here? That would be nice as I could theoretically create a melodic minor style scale to be able to acheive what it is I want to do here.
+Hmm... I mean theoretically I could make a function to reverse a sequence. Hmm... I mean that would be fairly useful as I could re-write this function to be even more generalized and
+it wouldn't require have a type specified. Hmm... Although I would still have the issue of generating arbitary chord scales, hmm... it seems as if 
+
+11/14/2020
+Hmm... What to do here? I should get the melodic minor scale working. It would really be ncie to have everything conform to the same interface so it makes it easier to work with everything.
+Hmm... Okay... I think there's a way to create a scale which operates in a similar fashion to what I'm looking for... Hmm... What to do here? It might be easier just to use a basic
+scale and let the user define it to whatever they want it to be. This would make things easier since you could define whatever arbitrary scale you want to use. Some of these matricies
+would only be so useful since since they apply to your basic diatonic scales. But that makes sense to develop those ideas first. Hmm... I believe I have the basics working here... I mean
+to truly understand the various differences between the different scale harmonizations would require a lot more studying of them. Hmm... But I believe I have the basics of the arbitary
+scale as well as the harmonic minor scale at the moment... That's good! Ultimately the more I use the tool and test it, the more the different bugs and kinks will get worked out...
+
+Hmm... How would I generate chord scales for arbitary voicings? That's a good question... I mean I'd need to rewrite some of the cycle matrices in order to achieve this. That's another
+task in and of itself. I'd say I have a fairly good idea of how to do this. Hmm... Yeah... It's probably better to generate these different matricies based on modifying the current ones.
+Hmm... Makes sense. I could write out the matricies for 7th chords and then modify them to generate chord scales with 6ths. I could also write out the matricies for 7th notes and then
+pass in a smaller matrix from this for the triads. Hmm... I'm not sure what the best approach is at the moment. But it looks like I have a clear idea of what would be next. Those two
+features are roughly orthogonal I reckon. 
+
+Hmm... I'm not sure how to approach this range issue. I mean each note would have to appear on a different string. I could define some sort of
+a string object or something and once the range is violated on any one of the strings by any one of the notes then we transpose it up or down an octave depending on what's going on.
+That seems to be a fairly straight forward way of approaching the range issue.
+
+Hmm... What about this 7th chord issue? I mean this opens up a lot more different possibilties for the various types of drop chords. I mean I think the best thing to do here would be
+to write out an example of the progression to see exactly how many entries in the matrix would be necessary. You have to include motion for an extra note. Is there a forth row then as
+well or just a 4th column? I think there might be a fourth row as things would expand a bit and there's an extra inversion... I suppose there's only one way to find out... Hmm... What
+were the tricks which Chris Buono was using to generate the triad chord scales? I guess I'd have to go back and watch the videos.... Hmmm... It seems as if this Ed McGuire book has them
+written out... This is probably something worth looking at much more closely. It definitely seems a lot mroe complicated than I was originally thinking... I think the range issue would
+be the next thing to tackle. Afterwards, I can revisit these different chord scale ideas to try and figure out the best way to generate different voice leading patterns for them.
+
+11/20/2020
+Okay, so lets try and figure out how to approach the range issues and make it eaiser to play the patterns on a set of strings which are inherently finite. Hmm... So how would we do this?
+Should we generate the cycle and then go through it chord by chord to transpose them all as need be? Hmm... what about checking the range of the chords while the cycle itself is 
+actually being generated? That would be an interesting approach and probably a lot more efficient in certain regards. After we transpose it up/down an octave we could then pass the new
+chord to the next part of the algorithm so it could continue on its merry way as it operates on a per chord basis. Hmmm... Yeah, that makes a lot more sense to me at this point. If I
+consider the other option then it would be hard to figure out when we need to stop transposing. Or would it? I reckon it would be comparatively althgouh I'd need to write out an example
+and compare the two approaches to be able to say for sure... it seems like right after apply_row_to_chord() would be the best place to add the range checking it might get tricky adding
+the range checking feature to the sub_cycle generator as well. But let's keep working and see what happens...
+
+Hmm... So how do we represent this concept of range here? It would likely involve two pitch objects, one for the start and one for the end of the range. How do we do this for the different
+strings? Well each string will have it's own range. We will just need to figure out how to assign a string to each of the different voices of the chord. Hmm... Makes sense... Do we add
+the open strings? Hmm... I mean it might be an iteresting way to approach studying these. I can say I really see a point in not including them (beyond just adhering to a particular rule).
+It would make an interesting exercise to properly mute things and make sure you play the voicings correctly... That's just an arbitrary configuring of the range parameter however. Hmm...
+That should be fairly easy to fix. Hmm... However how does this algorithm work? So we look at each note and see if it is out of range for the string it should be on. Once we've done that
+then we determine whether or not to transpose it up or down an octave. Hmm... Yeah, I can see how this works... 
+
+So how do we create a range here? And then how do we create a model of the guitar's range... Each string effectively has it's own range. These would then be used to figure things out.
+Hmm... we need some sort of a pitch comparison function here... I wonder if music21 has anything for that... Looks like they do... And they even have something which includes doing
+the comparisons for enharmonic notes. This would definitely be useful for our purposes... it looks like that's exactly what I'm looking for... the .ps attribute returns a float corresponding
+to some sort of pitch space concept... So how do I do this and what is meaningful for our purposes here? and what do we want to return from the comparison function? we should have three
+return values, in range, above range and below range. An enum would be nice here... Can I nest this inside the range class? Looks like I can... So how does this work? Pretty straight 
+foward...
+
+Hmm... okay... What to do next? Now that I have a range class I need to implement one for each string. Another class would be useful here for representing/storing the range of the guitar.
+Theoretically this could be expanded quite a bit for ust about any other instrument... Now how do I do this. Hmm... It might also be easier to use a list here in terms of the ordering.
+Then the numerical string value sets could more easily be computed/matched with the data structure... I can work on this tomorrow... It's getting close to bed time now...
+
+11/21/2020
+Okay... So let's take another look at this. Hmm... so how do I check to see if the chord is within the specified range? we'd have to have an ordered/corresponding pair of ranges to
+match the order of the notes in the chord. hmm... i mean there are likely several different ways to go about this... 
+
+11/23/2020
+Hmm... I think the best way would be to solve this for a few of the most common cases and then try to generalize it from there... Let's do this for the 1-2-3 string set. Hmm... given 
+that we're working with three note objects here then something like a 3 note tuple would be nice. Seems like a three element tuple would be what I'm looking for here... is it worth
+enumerating all the various different string sets? possibly... so how do we check the range of each note? 
+
+well we do have the chord as a list... ahh we could also use one of those things where we traverse multiple iterables at once... hmmm.... so what do I do now? I need to look at the 
+return value and figure out what to do with it... hmmm... is there a possibility that after the transposition things won't work? well why would that work? that would mean that... hmm...
+so there are three notes. well they would have to be some pretty strange voicings for that to occur. that shouldn't be happening with any of the voicings i've selected. I'm not quite
+up to the task of figuring all that stuff out atm... 
+
+hmm... that's a very good point to note here... should i be using the guitar pitches as they are written or as they actually are? becasue as they're written they're transposed up an
+octave. hmm... given that i'm mainly using them to display things i don't think it matters if the notated pitch is different than the actual pitch...
