@@ -363,3 +363,20 @@ up to the task of figuring all that stuff out atm...
 
 hmm... that's a very good point to note here... should i be using the guitar pitches as they are written or as they actually are? becasue as they're written they're transposed up an
 octave. hmm... given that i'm mainly using them to display things i don't think it matters if the notated pitch is different than the actual pitch...
+
+11/24/2020
+Hmm... So it seems as if the basic range checking has worked for generating one of the sub-cycles. Now I should get it working with one of the full cycles. Hmm...
+	1. Re-write this so that the cycles are generated more cleanly using the reversing scheme and it's cleaner
+	2. Incorporate the range aspect to make the generating usable exercises easier
+	
+So how do I approach this first one? It seems like it would be easiest to write a function which takes a stream and then generates another stream of the same elements but in reverse.
+Hmm... Although strictly speaking it's not a complete reversal because of the starting and ending chords... hmm... i wish i had noticed this earlier... oh well... looks like I don't 
+have to necessarily worry about this one...
+
+So the question more so now is how do I handle the range aspect? It seems like it would be a good idea to specify default behavior where the range isn't taken into account. What range
+would I specify there? And how would I do it with a set of strings? Hmm... Since we're dealing only with sets of three strings this should be pretty straight forward. Just make a
+3-tuple with all the elements specified as the maximum range possible. Well since this is meant to be used with guitar/piano using the range of a grand piano as the default seems
+like it would be a safe bet for now... hmm... or i could just make it an optional parameter and if it's not specified then the code doesn't execute... makes things a bit simplier
+and more efficient...
+
+Hmm... So it looks like I'm at the point where I can begin testing this... Hmm... so it definitely seems like the range checking feature is complete!

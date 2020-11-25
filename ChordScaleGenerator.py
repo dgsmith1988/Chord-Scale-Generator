@@ -188,7 +188,27 @@ def generate_sub_cycle(starting_chord, cycle_matrix_page, sc):
     return measure
 
 
-def generate_full_cycle(starting_chord, cycle_matrix_page, sc):
+# def generate_full_cycle(starting_chord, cycle_matrix_page, sc):
+#     # the starting chord is set to the last chord produced by the cycle
+#     full_cycle = stream.Stream()
+#     full_cycle.append(meter.TimeSignature('7/4'))
+#
+#     chord_as_list = list(starting_chord.pitches)
+#
+#     # lets start generating the cycle
+#     full_cycle.append(starting_chord)
+#     # the length of this range could be more generalized to the number of notes in the passed scale
+#     for i in range(0, 20):
+#         # use modular arithmetic here in preparation for expanding to 7th chords
+#         apply_row_to_chord(cycle_matrix_page[i % len(cycle_matrix_page)], chord_as_list, sc)
+#         full_cycle.append(chord.Chord(chord_as_list))
+#
+#     apply_row_to_chord(cycle_matrix_page[20 % len(cycle_matrix_page)], chord_as_list, sc)
+#
+#     return full_cycle, chord.Chord(chord_as_list)
+
+
+def generate_full_cycle(starting_chord, cycle_matrix_page, sc, note_range=()):
     # the starting chord is set to the last chord produced by the cycle
     full_cycle = stream.Stream()
     full_cycle.append(meter.TimeSignature('7/4'))
@@ -201,36 +221,17 @@ def generate_full_cycle(starting_chord, cycle_matrix_page, sc):
     for i in range(0, 20):
         # use modular arithmetic here in preparation for expanding to 7th chords
         apply_row_to_chord(cycle_matrix_page[i % len(cycle_matrix_page)], chord_as_list, sc)
-        full_cycle.append(chord.Chord(chord_as_list))
-
-    apply_row_to_chord(cycle_matrix_page[20 % len(cycle_matrix_page)], chord_as_list, sc)
-
-    return full_cycle, chord.Chord(chord_as_list)
-
-
-def generate_full_cycle_range(starting_chord, cycle_matrix_page, sc, note_range):
-    # the starting chord is set to the last chord produced by the cycle
-    full_cycle = stream.Stream()
-    full_cycle.append(meter.TimeSignature('7/4'))
-
-    chord_as_list = list(starting_chord.pitches)
-
-    # lets start generating the cycle
-    full_cycle.append(starting_chord)
-    # the length of this range could be more generalized to the number of notes in the passed scale
-    for i in range(0, 20):
-        # use modular arithmetic here in preparation for expanding to 7th chords
-        apply_row_to_chord(cycle_matrix_page[i % len(cycle_matrix_page)], chord_as_list, sc)
-        # check to see if the new chord is within the specified range
-        for string, chord_tone in zip(note_range, chord_as_list):
-            ret = string.is_pitch_in_range(chord_tone)
-            if ret == Range.ReturnValue.BelowRange:
-                # transpose the chord up an octave
-                transpose_chord_as_list(chord_as_list, 12)
-                break
-            elif ret == Range.ReturnValue.AboveRange:
-                transpose_chord_as_list(chord_as_list, -12)
-                break
+        # check to see if the new chord is within the specified range if ranges are specified
+        if len(note_range) != 0:
+            for string, chord_tone in zip(note_range, chord_as_list):
+                ret = string.is_pitch_in_range(chord_tone)
+                if ret == Range.ReturnValue.BelowRange:
+                    # transpose the chord up an octave
+                    transpose_chord_as_list(chord_as_list, 12)
+                    break
+                elif ret == Range.ReturnValue.AboveRange:
+                    transpose_chord_as_list(chord_as_list, -12)
+                    break
         # add the chord to the cycle since it should be in the specified range now
         full_cycle.append(chord.Chord(chord_as_list))
 
@@ -239,9 +240,38 @@ def generate_full_cycle_range(starting_chord, cycle_matrix_page, sc, note_range)
     return full_cycle, chord.Chord(chord_as_list)
 
 
-def generate_cycle_pairs(starting_chord, sc, pair_type, voicing_type=Voicing.Closed):
-    # Todo: Re-write this to use a reversing scheme to make this even more generic as a pair of cycles really is just
-    #  one cycle follow the its reverse
+# def generate_cycle_pairs2(starting_chord, sc, pair_type, voicing_type=Voicing.Closed):
+#     # Todo: Re-write this to use a reversing scheme to make this even more generic as a pair of cycles really is just
+#     #  one cycle follow the its reverse
+#     cycle_pair = stream.Stream()
+#
+#     if pair_type == "2/7":
+#         first_cycle_matrix_page = cycle2matrix[:, :, 0]
+#         second_cycle_matrix_page = cycle7matrix[:, :, 0]
+#     elif pair_type == "4/5":
+#         first_cycle_matrix_page = cycle4matrix[:, :, 0]
+#         second_cycle_matrix_page = cycle5matrix[:, :, 0]
+#     elif pair_type == "3/6":
+#         first_cycle_matrix_page = cycle3matrix[:, :, 0]
+#         second_cycle_matrix_page = cycle6matrix[:, :, 0]
+#     else:
+#         raise Exception("pair_type passed is an invalid value")
+#
+#     if voicing_type == Voicing.Drop2:
+#         first_cycle_matrix_page = generate_drop2_matrix_page(first_cycle_matrix_page)
+#         second_cycle_matrix_page = generate_drop2_matrix_page(second_cycle_matrix_page)
+#
+#     first_cycle, next_chord = generate_full_cycle(copy.deepcopy(starting_chord), first_cycle_matrix_page, sc)
+#     second_cycle = generate_full_cycle(next_chord, second_cycle_matrix_page, sc)[0]
+#
+#     cycle_pair.append(first_cycle)
+#     cycle_pair.append(second_cycle)
+#
+#     return cycle_pair
+
+
+def generate_cycle_pairs(starting_chord, sc, pair_type, string_ranges=(), voicing_type=Voicing.Closed):
+    # Todo: clean up the variable names here to be more accurate
     cycle_pair = stream.Stream()
 
     if pair_type == "2/7":
@@ -260,8 +290,8 @@ def generate_cycle_pairs(starting_chord, sc, pair_type, voicing_type=Voicing.Clo
         first_cycle_matrix_page = generate_drop2_matrix_page(first_cycle_matrix_page)
         second_cycle_matrix_page = generate_drop2_matrix_page(second_cycle_matrix_page)
 
-    first_cycle, next_chord = generate_full_cycle(copy.deepcopy(starting_chord), first_cycle_matrix_page, sc)
-    second_cycle = generate_full_cycle(next_chord, second_cycle_matrix_page, sc)[0]
+    first_cycle, next_chord = generate_full_cycle(copy.deepcopy(starting_chord), first_cycle_matrix_page, sc, string_ranges)
+    second_cycle = generate_full_cycle(next_chord, second_cycle_matrix_page, sc, string_ranges)[0]
 
     cycle_pair.append(first_cycle)
     cycle_pair.append(second_cycle)

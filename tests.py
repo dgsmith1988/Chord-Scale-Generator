@@ -79,7 +79,6 @@ def cycle36_a_minor_test():
 
 
 def transpose_test():
-
     tonic = 'C'
     sc = scale.MajorScale(tonic)
     tonic_triad = chord.Chord(sc.pitchesFromScaleDegrees([1, 3, 5], 'C5', 'B5'))
@@ -99,11 +98,11 @@ def range_check_test():
     tonic_triad = chord.Chord(sc.pitchesFromScaleDegrees([1, 3, 5], 'C5', 'B5'))
     # create a string set to do the range checking with
     string_set = (GuitarRange.A_string, GuitarRange.D_string, GuitarRange.G_string)
-    cycle = generate_full_cycle_range(tonic_triad, cycle2matrix[0], sc, string_set)[0]
+    cycle = generate_cycle_pairs(tonic_triad, sc, "2/7", string_set)
     cycle.show()
 
 
-cycle27_test()
+# cycle27_test()
 # cycle36_test()
 # cycle45_test()
 # cycle36_drop3_test()
