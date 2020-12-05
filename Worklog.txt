@@ -380,3 +380,146 @@ like it would be a safe bet for now... hmm... or i could just make it an optiona
 and more efficient...
 
 Hmm... So it looks like I'm at the point where I can begin testing this... Hmm... so it definitely seems like the range checking feature is complete!
+
+11/28/2020
+So how does this range checking function work? It takes as parameters a chord as a list and a 3-tuple of note ranges. It then checks to see if each of the notes is within the specified
+range and then transposes the entire chord up or down an octave accordingly. Hmm... I wonder if there's a better structure for handling the pitches in the music21 library somewhere.
+That's a good question... Why did I not just use the chord object/class? I can revisit that at another point in time. So what do I need to do to test this? Generate some chords and
+test them on a specified range set. Make sure that they test the various different cases:
+	1. In Range - no transposition
+	2. Out of range below - tranposed up an octave
+	3. Out of range above - transposed down an octave
+	
+Ahh... So the function is working although it doesn't appear that way due to the music21 objects all being a reference (or what have you, I can't recall the exact/precise defintion here
+I'll have to look that up another time). So it seems as if the basic range checking function works well... What was the test which triggered this? I needed to make sure that the range
+functionality for the sub_cycle generation function works... Hmm.. There has to be some sort of larger testing strategy I could use here... I should probably research this some more 
+to know the various types of testing I'll be doing...
+
+Hmm... I wonder where this behavior is coming from in terms of constantly generating the different treble clefs. Is that something to do with the XML format or is it something from
+Music21? The extra 7/4 time signature could be removed by merging both the cycles into one stream. This might actually be having much more of an impact than I anticipated. It would
+probably be worth exploring that to see what happens... also, do I test the basic cycle functions at all? it would help me isolate this behavior... Hmm... Yes, it seems that a single
+stream would handle things better since that is performing much better based on this full_cycle test. Hmm... How to handle this? Is there a function which already does this for me?
+Perhaps the flatten function... Hmm... it would be nice to automate this formating but I'm not sure how to necessarily do that... Perhaps there's a way to write these streams directly
+to a MusicXML format and from there something happens/works out...
+
+Hmmm... I've asked a question on the forum so I should work on something else until I get a response or think of an idea
+
+11/30/2020
+Hmm... It seems as if learning how to do the page formatting the "proper" way involves a steep learning curve in terms of learning MusicXML as well as some of the deeper aspects of 
+Music21. I can do everything else as much as possible and then come back to this. Hmm... It seems as if the text box needs very precise specifications regarding it's placement. This
+is not what I'm looking for. I'd like it to be placed at the beginning of a measure. The lyrics tool might be more appropriate... Yes, I get a much closer representation to what I'm
+looking for when using that. Then with each measure as a line itself things look better...
+
+12/01/2020
+Okay, so how do I do this? What am I attempting to do anyways? I would like to take a key and a voicing and generate all the possible chord scales for it on the various sets of strings.
+I believe I have all the various functions in place for being able to achieve this. I think I would be able to do this with the "generate cycle pairs" function. This would allow me to
+do a lot of these things. I would only need to call it for each of the various string sets. Hmm... It is unfortunate that I do not have a guitar here as it would be handy to realize/
+test out the different chord voicings on... Hmm... There seem to be errors in some of my diagrams here... I'm not sure I had the best/most consistent naming scheme with the different
+A/B forms... Hmm... yes... completing this for the drop 2 voicings is a bit different... There's are multiple different fingerings which are possible for the chords. Focus on getting
+the closed triads done first and then work on the drop 2 triads with their multiple fingerings.
+
+Okay... So how do we do this? It should be pretty straight forward. We know the key, we know the scale, hmm... we might have to transpose the starting chord to match the range (or 
+modify the range checking algorithm to automatically bring the chord into range. From there we just pass it to the various functions and save and output the results. We'd also have to
+make sure the naming is consistent/saved... Hmm... It might be a good idea to write a function in the GenerateChordScale module to automatically do the naming/saving for you/us...
+Hmm... I need a way of associating a number with the different string sets as that would make things easier to name... I could sub-class the range class with a guitar string class
+and then add a string number member to make this a bit easier... Well it would more be a separate... well maybe not... I could also make an enum... Hmm... it would also be nice if
+I had a way of indexing the class itself... I can worry about the syntatic sugar later and just focus on getting the various conceptual aspects worked out... Hmm... so what is this
+guitar range really? I mean it's a class which contains the ranges referring to the strings of a guitar. Given that this is fixed, operating on the indexing method might be a good way...
+Hmm... However... Well what is it I want to do here? Being able to do things like slice and get multiple strings in one pass (i.e. 4-3-1 for a drop 2 voicing) would be extremely useful.
+How is it I could achieve that? Well I could create a list dynamically once the function is called and put a dummy value in at the 0'th element. From there I could perform the operations
+normally, making sure not to call anything with a 0. This works for now and I can rework it into something more elegant later... Hmm... Or I could subtract 1 from all the values passed
+in the key and then use that to perform the operation...
+
+Damn... I was thinking more how matlab vectors work... I'll have to take another stab as this tomorrow...
+
+12/02/2020
+Hmm... Adding this syntactic sugar is a bit more complicated than I thought. It's only six values so just hard code them...
+
+Hmm... So what was I doing here again? I was attmpting to generate a chord scale exercise for each string set based on a certain key as well as a certain specified cycle. Hmm... Well
+what do I do with the various cycles in between? Do I just export them to a file? That seems like a good method here... Hmm... This function will be different from the other ones. It
+would write the files out within the function itself. Hmm... this could work... If we know the scale as well as the tonic we could generate a different starting chord for each different
+string set. I think I'll also have to expand my range checking function to work on the drop 2 voicings...
+
+Hmmm... The lowest note should be from the lowest string in the set. So we take that range and find the highest instance of the note in this scenario... I wonder if music21 has something
+which does this? Hmm... How do we do this? There seem to be several ways. It definitely seems as if we need an octave number here to be as useful as possible. I could take the octave
+number from the upper or lower range and then transpose as need be... That seems like a pretty good option... 
+
+Hmm... I'm not entirely sold on the range aspects in terms of adding the extra notes. Chris Buono seemed to have a nice system in place where each chord only had one instance in the
+range of frets he was working with. Hmm... That's an interesting way to think about it... It would be easier to test these ideas out ona guitar once I get back...
+
+Although I would definitely say this first one was a success... However, the verification aspects of this look like they'll be a bit of a beast. So now I need to be able to do it for
+all the different string sets. Interesting... 
+
+Hmm... So it seems as if I have the basics down in terms of generating the chord scales on all the string sets for the close voiced chords. nice! What's next? I need to be able to do
+this for the open voicings as well.
+
+Ahh... I have figured out how to add the line breaks in musicxml! Now how do I make it so music21 can export these... Hmm... I believe I've figured it out... Well perhaps... I think
+what I need to do is define explicit system breaks now...
+
+12/04/2020
+Hmm... So the stream class has a boolean which indicates whether or not all page breaks in the piece are explicitly defined. Hmm... Is this something I toggle or something which is
+automatically generated? Evidently it mpas to the music xml <supports attribute "new-system"> tag... I should investigate this a bit more to fully understand it... It could hold the
+answer I'm looking for... This also applies only if this is the outermost stream being shown. Hmm... Given that I'm only dealing with a single stream here... well actually I'm not
+as I've got the measures which are streams themselves. But it is the outermost stream which is being shown... Hmm... well even though this doesn't explain things necessarily it does
+indicate that it is possible to define these system breaks and put them in the stream somehow... I mean this is all fine and dandy but now we need to actually define some system
+breaks. How to go about that? 
+
+Well it looks like I need to look at this description much more closely.
+
+There are two types of objects that speciy the layout on the page/screen for Scores and
+other Stream objects. Hmm... Perhaps I could create a larger stream object to create
+some sort of heiarchy which they already have code which generates things for...
+
+There are two main types of layout objects. Layout objects describing elements and layout
+objects describing streams. Hmm... Well what is the difference between the two?
+
+ScoreLayout, PageLayout, SystemLayout and StaffLayout descibre the size of pages, the geometry
+of page and system margins, the distance between staves, etc. Hmm...Well explicitly the
+measures per line isn't mentioned here but it might fall under the "geometry of page"
+and the etc part... The model for the layout objects is taken directly from MusicXML.
+Hmm... I'm not entirely sure what this means and if there's a technical definition of
+what "model" means here but this likely means studying the MusicXML documentation would
+be useful.
+
+So what is the second set of objects here? These are Stream subclasses that can be emplyoed
+when a program needs to easily iterate around the systems and pages defined through the
+layout objects just described. Hmm... So this wouldn't be what I need. I would more need
+what I was previously talking about... Yeah, we just want to define the layout, not iterate
+through it... Hmm.. Well perhaps... I'm not entirely sure how the layout aspect itself
+works but supposing we create one we might need to iterate around it in some sort of a
+fashion... Well shall see I suppose...
+
+Hmm... Well now what do I do with this system object? Do I insert it or something?
+Hot diggity damn, that seems to have done the trick!
+
+Now I just have to decide where do I implement these formatting aspects? Is it something
+I do in the generation of them? Hmm... That doesn't leave a lot of options if you don't 
+like how things are formatted... I think it will be easier to apply the formatting at the
+end as this leaves a lot more flexibility for what happens to the measures/systems in
+between the various other parts of the chord...
+
+Hmm.. Okay... So I'll need to iterate through the stream and then add a new system after
+each of the measures. How do I go about that? Especially now that the stream is flat?
+Hmm... What exactly does that mean...? Let's take a look at the object in memory?
+
+Hmm... It potentially seems as if flattening the stream here wasn't the best approach.
+It is now just a sequence of chords. Ideally having the individual measures retained
+is what we want... Hmm... Although... Perhaps removing the 7/4 time signature object
+from the second stream also helps accomplish what it is we're looking for here...
+
+Hmm... but now I'm back to the issue with the various extra treble clefs...
+
+Hmm... Interesting... It doesn't look like I properly apply the measure concept when
+generating the cycles here. This might solve a few of the formatting issues and provide
+a much better method for achieving what I want here... Having the granularity of defining
+the various measures will help in achieving what I'm looking for...
+
+It looks like I'd need to do that in the generate_full_cycle function... Hmmm... Although
+the generate_sub_cycle function already has the measure functionality built into it...
+
+Hmm... it might be useful to redefine this generate sub_cycle function to return the
+next chord as well... This would help with the issue I had before I think... Hmm...
+although some of the patterns didn't follow exactly the same format in terms of the
+chord inversions which they started on... Hmm... I think I might have coded for that
+in the data structures which contain the voice leading patterns...
+
