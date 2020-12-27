@@ -1,24 +1,26 @@
-from music21 import stream, chord, meter, pitch, metadata, layout
+from music21 import stream, chord, meter, pitch, metadata, layout, duration, note
 import numpy as np
 import copy
 from enum import Enum
 
 """cycle matrices - these data structures contain the distances each chord tone should move to based on the patterns
 derived from the different cycles, they will have to be expanded once support for four note chords is added. the order
-in each row is top, middle, bottom."""
+in each row is top, middle, bottom. the order of the pages corresponds doesn't correspond necessarily to the starting
+chord inversion, but more the order of sub_cycles which appear in the cycles naturally"""
 
 cycle2matrix = np.zeros((3, 3, 3), dtype=np.int)
 cycle2matrix[0, 0, :] = [-2, -1, -1]
 cycle2matrix[0, 1, :] = [-1, -2, -1]
 cycle2matrix[0, 2, :] = [-1, -1, -2]
 
-cycle2matrix[1, 0, :] = cycle2matrix[0, 2, :]
-cycle2matrix[1, 1, :] = cycle2matrix[0, 0, :]
-cycle2matrix[1, 2, :] = cycle2matrix[0, 1, :]
+cycle2matrix[1, 0, :] = cycle2matrix[0, 1, :]
+cycle2matrix[1, 1, :] = cycle2matrix[0, 2, :]
+cycle2matrix[1, 2, :] = cycle2matrix[0, 0, :]
 
-cycle2matrix[2, 0, :] = cycle2matrix[0, 1, :]
-cycle2matrix[2, 1, :] = cycle2matrix[0, 2, :]
-cycle2matrix[2, 2, :] = cycle2matrix[0, 0, :]
+cycle2matrix[2, 0, :] = cycle2matrix[0, 2, :]
+cycle2matrix[2, 1, :] = cycle2matrix[0, 0, :]
+cycle2matrix[2, 2, :] = cycle2matrix[0, 1, :]
+
 
 # it is possible to define these matrices all based on the cycle2 ones defined previously, however for the sake of
 # clarity and debugging it defining the first one separately was chosen
@@ -40,13 +42,13 @@ cycle4matrix[0, 0, :] = [0, 1, 1]
 cycle4matrix[0, 1, :] = [1, 0, 1]
 cycle4matrix[0, 2, :] = [1, 1, 0]
 
-cycle4matrix[1, 0, :] = cycle4matrix[0, 2, :]
-cycle4matrix[1, 1, :] = cycle4matrix[0, 0, :]
-cycle4matrix[1, 2, :] = cycle4matrix[0, 1, :]
+cycle4matrix[1, 0, :] = cycle4matrix[0, 1, :]
+cycle4matrix[1, 1, :] = cycle4matrix[0, 2, :]
+cycle4matrix[1, 2, :] = cycle4matrix[0, 0, :]
 
-cycle4matrix[2, 0, :] = cycle4matrix[0, 1, :]
-cycle4matrix[2, 1, :] = cycle4matrix[0, 2, :]
-cycle4matrix[2, 2, :] = cycle4matrix[0, 0, :]
+cycle4matrix[2, 0, :] = cycle4matrix[0, 2, :]
+cycle4matrix[2, 1, :] = cycle4matrix[0, 0, :]
+cycle4matrix[2, 2, :] = cycle4matrix[0, 1, :]
 
 cycle5matrix = np.zeros((3, 3, 3), dtype=np.int)
 cycle5matrix[0, 0, :] = [-1, -1, 0]
@@ -60,19 +62,6 @@ cycle5matrix[1, 2, :] = cycle5matrix[0, 0, :]
 cycle5matrix[2, 0, :] = cycle5matrix[0, 2, :]
 cycle5matrix[2, 1, :] = cycle5matrix[0, 0, :]
 cycle5matrix[2, 2, :] = cycle5matrix[0, 1, :]
-
-# cycle3matrix = np.zeros((3, 3, 3), dtype=np.int)
-# cycle3matrix[0, 0, :] = [-1, 0, 0]
-# cycle3matrix[0, 1, :] = [0, -1, 0]
-# cycle3matrix[0, 2, :] = [0, 0, -1]
-#
-# cycle3matrix[1, 0, :] = cycle3matrix[0, 2, :]
-# cycle3matrix[1, 1, :] = cycle3matrix[0, 0, :]
-# cycle3matrix[1, 2, :] = cycle3matrix[0, 1, :]
-#
-# cycle3matrix[2, 0, :] = cycle3matrix[0, 1, :]
-# cycle3matrix[2, 1, :] = cycle3matrix[0, 2, :]
-# cycle3matrix[2, 2, :] = cycle3matrix[0, 0, :]
 
 cycle3matrix = np.zeros((3, 3, 3), dtype=np.int)
 cycle3matrix[0, 0, :] = [-1, 0, 0]
@@ -103,7 +92,17 @@ cycle6matrix[2, 2, :] = cycle6matrix[0, 1, :]
 
 class Voicing(Enum):
     Closed = 1
-    Drop2 = 2
+    Drop2_A_form = 2
+    Drop2_B_form = 3
+
+    @staticmethod
+    def to_string(voicing):
+        if voicing == Voicing.Closed:
+            return "Closed"
+        elif voicing == Voicing.Drop2_A_form or voicing == Voicing.Drop2_B_form:
+            return "Drop 2"
+        else:
+            raise Exception("invalid voicing passed")
 
 
 class NoteRange:
@@ -141,14 +140,14 @@ class GuitarString(NoteRange):
 
 
 class GuitarRange:
-    # this class is used to limit the chord voicings to keep them from open strings to the 14th fret. the note values
+    # this class is used to limit the chord voicings to keep them from open strings to the 15th fret. the note values
     # here correspond to how guitar is notated as opposed to how it's actually pitched to make reading the scores easier
-    E_string_low = GuitarString(pitch.Pitch('E3'), pitch.Pitch('G4'), GuitarString.StringNumber.E_string_low)
-    A_string = GuitarString(pitch.Pitch('A3'), pitch.Pitch('C5'), GuitarString.StringNumber.A_string)
-    D_string = GuitarString(pitch.Pitch('D4'), pitch.Pitch('F5'), GuitarString.StringNumber.D_string)
-    G_string = GuitarString(pitch.Pitch('G4'), pitch.Pitch('Bb5'), GuitarString.StringNumber.G_string)
-    B_string = GuitarString(pitch.Pitch('B4'), pitch.Pitch('D6'), GuitarString.StringNumber.B_string)
-    E_string_high = GuitarString(pitch.Pitch('E5'), pitch.Pitch('G6'), GuitarString.StringNumber.E_string_high)
+    E_string_low = GuitarString(pitch.Pitch('E3'), pitch.Pitch('G#4'), GuitarString.StringNumber.E_string_low)
+    A_string = GuitarString(pitch.Pitch('A3'), pitch.Pitch('C#5'), GuitarString.StringNumber.A_string)
+    D_string = GuitarString(pitch.Pitch('D4'), pitch.Pitch('F#5'), GuitarString.StringNumber.D_string)
+    G_string = GuitarString(pitch.Pitch('G4'), pitch.Pitch('B5'), GuitarString.StringNumber.G_string)
+    B_string = GuitarString(pitch.Pitch('B4'), pitch.Pitch('D#6'), GuitarString.StringNumber.B_string)
+    E_string_high = GuitarString(pitch.Pitch('E5'), pitch.Pitch('G#6'), GuitarString.StringNumber.E_string_high)
 
     @staticmethod
     def get_string(string_number):
@@ -168,19 +167,22 @@ class GuitarRange:
             return GuitarRange.E_string_low
 
 
-def transpose_chord_as_list(chord_as_list, interval):
-    for chord_tone in chord_as_list:
-        chord_tone.transpose(interval, inPlace=True)
-
-
 def apply_row_to_chord(row, chord_as_list, sc):
     for j in range(0, len(chord_as_list)):
         if row[j] == 0:
-            continue
+            # continue
+            # perform a deep copy here so each chord has a unique instance of it's pitches, otherwise you run into
+            # issues when having to transpose chords to fit a range and there are shared pitch objects
+            chord_as_list[j] = copy.deepcopy(chord_as_list[j])
         elif row[j] < 0:
             chord_as_list[j] = sc.next(chord_as_list[j], 'descending', abs(row[j]))
         else:
             chord_as_list[j] = sc.next(chord_as_list[j], 'ascending', row[j])
+
+
+def transpose_chord_as_list(chord_as_list, interval):
+    for chord_tone in chord_as_list:
+        chord_tone.transpose(interval, inPlace=True)
 
 
 def check_note_ranges_and_transpose(chord_as_list, note_ranges):
@@ -212,32 +214,23 @@ def generate_drop2_matrix_page(cycle_matrix_page):
     return drop2_matrix_page
 
 
+def generate_drop2_matrix(cycle_matrix):
+    drop2_matrix = np.zeros((3, 3, 3), dtype=np.int)
+    drop2_matrix[0, :, :] = generate_drop2_matrix_page(cycle_matrix[0, :, :])
+    drop2_matrix[1, :, :] = generate_drop2_matrix_page(cycle_matrix[1, :, :])
+    drop2_matrix[2, :, :] = generate_drop2_matrix_page(cycle_matrix[2, :, :])
+
+    return drop2_matrix
+
+
 def generate_sub_cycle(root_scale, starting_chord, cycle_matrix_page, note_ranges=()):
-    chord_as_list = list(starting_chord.pitches)
-    measure = stream.Measure()
-    # make it a 7/4 measure as there are 7 chords to a sub-cycle
-    # measure.append(meter.TimeSignature('7/4'))
-    # add the first chord before generating the rest of the cycle
-    measure.append(chord.Chord(starting_chord))
-
-    # apply the rules of the cycle matrix to generate the rest of the chords. since we're dealing with diatonic chords
-    # at the moment, the cycle will need to be run twice to generate the remaining six chords
-    for i in range(0, 2):
-        for row in cycle_matrix_page:
-            apply_row_to_chord(row, chord_as_list, root_scale)
-            # check to see if the new chord is within the specified range if ranges are specified
-            if len(note_ranges) != 0:
-                check_note_ranges_and_transpose(chord_as_list, note_ranges)
-            measure.append(chord.Chord(chord_as_list))
-    return measure
-
-
-def generate_sub_cycle_2(root_scale, starting_chord, cycle_matrix_page, note_ranges=()):
     chord_as_list = list(starting_chord.pitches)
     measure = stream.Measure()
     # make it a 7/4 measure as there are 7 chords to a sub-cycle
     measure.append(meter.TimeSignature('7/4'))
     # add the first chord before generating the rest of the cycle
+    if len(note_ranges) != 0:
+        check_note_ranges_and_transpose(starting_chord.pitches, note_ranges)
     measure.append(chord.Chord(starting_chord))
 
     # apply the rules of the cycle matrix to generate the rest of the chords. since we're dealing with diatonic chords
@@ -255,89 +248,22 @@ def generate_sub_cycle_2(root_scale, starting_chord, cycle_matrix_page, note_ran
     return measure, chord.Chord(chord_as_list)
 
 
-def generate_full_cycle_2(root_scale, starting_chord, cycle_matrix, note_ranges=()):
-    # the starting chord is set to the last chord produced by the cycle
+def generate_full_cycle(root_scale, starting_chord, cycle_matrix, note_ranges=()):
     full_cycle = stream.Stream()
 
-    # the length of this range could be more generalized to the number of notes in the passed scale
     seed_chord = starting_chord
     for i in range(0, 3):
-        sub_cycle, next_chord = generate_sub_cycle_2(root_scale, seed_chord, cycle_matrix[i], note_ranges)
+        sub_cycle, next_chord = generate_sub_cycle(root_scale, seed_chord, cycle_matrix[i], note_ranges)
         # the time signature is already taken care of in the first measure, so remove it from the sub-sequent measures
         if i > 0:
             sub_cycle.pop(0)
         full_cycle.append(sub_cycle)
         seed_chord = next_chord
 
-    # this was put here as it appears there's a bug in the append() function when adding a measure to a stream where
-    # there's a time signature object already
-    # full_cycle.insert(0, meter.TimeSignature('7/4'))
     return full_cycle, next_chord
 
 
-def generate_full_cycle(root_scale, starting_chord, cycle_matrix_page, note_ranges=()):
-    # the starting chord is set to the last chord produced by the cycle
-    full_cycle = stream.Stream()
-    full_cycle.append(meter.TimeSignature('7/4'))
-
-    chord_as_list = list(starting_chord.pitches)
-
-    # lets start generating the cycle
-    full_cycle.append(starting_chord)
-    # the length of this range could be more generalized to the number of notes in the passed scale
-    for i in range(0, 20):
-        # use modular arithmetic here in preparation for expanding to 7th chords
-        apply_row_to_chord(cycle_matrix_page[i % len(cycle_matrix_page)], chord_as_list, root_scale)
-        # check to see if the new chord is within the specified range if ranges are specified
-        if len(note_ranges) != 0:
-            check_note_ranges_and_transpose(chord_as_list, note_ranges)
-        # add the chord to the cycle since it should be in the specified range now
-        full_cycle.append(chord.Chord(chord_as_list))
-
-    apply_row_to_chord(cycle_matrix_page[20 % len(cycle_matrix_page)], chord_as_list, root_scale)
-
-    return full_cycle, chord.Chord(chord_as_list)
-
-
-def generate_cycle_pairs(root_scale, starting_chord, pair_type, note_ranges=(), voicing_type=Voicing.Closed):
-    cycle_pair = stream.Stream()
-
-    if pair_type == "2/7":
-        first_cycle_matrix_page = cycle2matrix[:, :, 0]
-        second_cycle_matrix_page = cycle7matrix[:, :, 0]
-    elif pair_type == "4/5":
-        first_cycle_matrix_page = cycle4matrix[:, :, 0]
-        second_cycle_matrix_page = cycle5matrix[:, :, 0]
-    elif pair_type == "3/6":
-        first_cycle_matrix_page = cycle3matrix[:, :, 0]
-        second_cycle_matrix_page = cycle6matrix[:, :, 0]
-    else:
-        raise Exception("pair_type passed is an invalid value")
-
-    if voicing_type == Voicing.Drop2:
-        first_cycle_matrix_page = generate_drop2_matrix_page(first_cycle_matrix_page)
-        second_cycle_matrix_page = generate_drop2_matrix_page(second_cycle_matrix_page)
-
-    first_cycle, next_chord = generate_full_cycle(root_scale, copy.deepcopy(starting_chord), first_cycle_matrix_page,
-                                                  note_ranges)
-    second_cycle = generate_full_cycle(root_scale, next_chord, second_cycle_matrix_page, note_ranges)[0]
-
-    # add notation to make the score easier to read
-    first_cycle[1].lyric = "First cycle starts"
-    second_cycle[1].lyric = "Second cycle starts"
-
-    # sl = layout.SystemLayout(isNew=True)
-    first_cycle.append(layout.SystemLayout(isNew=True))
-    cycle_pair.append(first_cycle)
-    # remove the time signature from the second cycle as it will mess up the formatting since the combined stream is
-    # flattened when returned
-    second_cycle.pop(0)
-    cycle_pair.append(second_cycle)
-
-    return cycle_pair
-
-
-def generate_cycle_pairs2(root_scale, starting_chord, pair_type, note_ranges=(), voicing_type=Voicing.Closed):
+def generate_cycle_pair(root_scale, starting_chord, pair_type, note_ranges=(), voicing_type=Voicing.Closed):
     cycle_pair = stream.Stream()
 
     if pair_type == "2/7":
@@ -352,43 +278,118 @@ def generate_cycle_pairs2(root_scale, starting_chord, pair_type, note_ranges=(),
     else:
         raise Exception("pair_type passed is an invalid value")
 
-    if voicing_type == Voicing.Drop2:
-        first_cycle_matrix = generate_drop2_matrix_page(first_cycle_matrix)
-        second_cycle_matrix = generate_drop2_matrix_page(second_cycle_matrix)
+    if voicing_type == Voicing.Drop2_A_form or voicing_type == Voicing.Drop2_B_form:
+        first_cycle_matrix = generate_drop2_matrix(first_cycle_matrix)
+        second_cycle_matrix = generate_drop2_matrix(second_cycle_matrix)
 
-    first_cycle, next_chord = generate_full_cycle_2(root_scale, copy.deepcopy(starting_chord), first_cycle_matrix,
-                                                    note_ranges)
-    second_cycle = generate_full_cycle_2(root_scale, next_chord, second_cycle_matrix, note_ranges)[0]
+    first_cycle, next_chord = generate_full_cycle(root_scale, copy.deepcopy(starting_chord), first_cycle_matrix,
+                                                  note_ranges)
+    second_cycle = generate_full_cycle(root_scale, next_chord, second_cycle_matrix, note_ranges)[0]
 
-    # add notation to make the score easier to read
-    first_cycle[0][1].lyric = "First cycle starts"
-    second_cycle[0][1].lyric = "Second cycle starts"
-
-    # sl = layout.SystemLayout(isNew=True)
-    first_cycle.append(layout.SystemLayout(isNew=True))
     cycle_pair.append(first_cycle)
-    # remove the time signature from the second cycle as it will mess up the formatting since the combined stream is
-    # flattened when returned
+    # remove the time signature from the second cycle as it will mess up the formatting
     second_cycle[0].pop(0)
     cycle_pair.append(second_cycle)
 
     return cycle_pair
 
 
-def generate_cycle_pairs_for_all_string_sets(root_scale, tonic, pair_type):
-    for i in range(1, 5):
-        string_set = (GuitarRange.get_string(i+2), GuitarRange.get_string(i+1), GuitarRange.get_string(i))
-        # generate the starting chord for this particular string set
-        triad_root = pitch.Pitch(tonic)
-        triad_root.octave = string_set[0].highest_pitch.octave
-        triad_root.transposeBelowTarget(string_set[0].highest_pitch, inPlace=True)
-        tonic_triad = chord.Chord(root_scale.pitchesFromScaleDegrees([1, 3, 5], triad_root, triad_root.transpose(11)))
-        cycle_pair = generate_cycle_pairs(root_scale, tonic_triad, pair_type, string_set)
+def generate_cycle_pairs_for_all_string_sets(root_scale, tonic, pair_type, voicing=Voicing.Closed):
+    cycle_pairs = []
+    for strings in iteration_function(voicing):
+        string_set = (GuitarRange.get_string(strings[0]), GuitarRange.get_string(strings[1]), GuitarRange.get_string(strings[2]))
+        # # generate the starting chord for this particular string set
+        # triad_root = pitch.Pitch(tonic)
+        # triad_root.octave = string_set[0].highest_pitch.octave
+        # triad_root.transposeBelowTarget(string_set[0].highest_pitch, inPlace=True)
+        #
+        # if voicing == Voicing.Closed:
+        #     tonic_triad = chord.Chord(root_scale.pitchesFromScaleDegrees([1, 3, 5], triad_root, triad_root.transpose(11)))
+        # elif voicing == Voicing.Drop2_A_form or voicing == Voicing.Drop2_B_form:
+        #     tonic_triad = chord.Chord([triad_root, triad_root.transpose(7), triad_root.transpose(16)])
+        # else:
+        #     raise Exception("invalid voicing passed")
+
+        tonic_triad = generate_tonic_triad(root_scale, tonic, string_set, voicing)
+
+        cycle_pair = generate_cycle_pair(root_scale, tonic_triad, pair_type, string_set, voicing)
+
+        # populate all the metadata to make the titling and everything automatic
         cycle_pair.metadata = metadata.Metadata()
         cycle_pair.metadata.title = "Cycle " + pair_type + " Progression in " + root_scale.name + "\nString Set: " + \
             str(string_set[0].number.value) + "-" + str(string_set[1].number.value) + "-" + \
-            str(string_set[2].number.value) + " - Closed Triads"
-        cycle_pair.metadata.composer = "Graham's Chord Cycle Generation Software"
+            str(string_set[2].number.value) + "; " + Voicing.to_string(voicing) + " Triads"
+        cycle_pair.metadata.composer = "Graham Smith"
+        cycle_pair.metadata.date = "2020"
+
+        # add system breaks at the end each measure to make it one measure per line
         cycle_pair.definesExplicitSystemBreaks = True
-        cycle_pair.show()
-        # cycle_pair.write("MusicXML", "C:\\Temp\\Cycle36_progression3")
+        for s in cycle_pair.getElementsByClass(stream.Stream):
+            measures = s.getElementsByClass(stream.Measure)
+            for m in measures:
+                m.append(layout.SystemLayout(isNew=True))
+        cycle_pair.definesExplicitSystemBreaks = True
+
+        # add notation to make the score easier to read
+        cycle_pair[1][0][1].lyric = "First cycle starts"
+        cycle_pair[2][0][0].lyric = "Second cycle starts"
+
+        # add an ending measure to make the line breaks and formatting a bit cleaner/more consistent
+        m = stream.Measure()
+        last_chord = tonic_triad.__deepcopy__()
+        last_chord.duration = duration.Duration(4.0)
+        m.append(last_chord)
+        r = note.Rest()
+        r.duration = duration.Duration(2.0)
+        m.append(r)
+
+        cycle_pair[2].append(m)
+        cycle_pairs.append(cycle_pair)
+    return cycle_pairs
+
+
+def iteration_function(voicing):
+    # this function is just used a scrap for figuring out the logic related to generating the
+    # different string permutations
+    tuples = []
+
+    if voicing == Voicing.Closed:
+        for i in range(1, 5):
+            tuples.append((i+2, i+1, i))
+    elif voicing == Voicing.Drop2_A_form:
+        for i in range(1, 4):
+            tuples.append((i+3, i+2, i))
+    elif voicing == Voicing.Drop2_B_form:
+        for i in range(1, 4):
+            tuples.append((i+3, i+1, i))
+    else:
+        raise Exception("Invalid voicing passed")
+
+    return tuples
+
+
+def write_cycle_to_xml(cycle, directory_path):
+    # TODO: figure out better naming here as this isn't limited to just cycles
+    # This function assumes there is meta-data which can be extracted to form the filename as well as that the passed
+    # directory path already exists
+    filename = cycle.metadata.title.replace('/', '')
+    filename = filename.replace('\n', '; ')
+    filename = filename.replace(':', '')
+    file_path = directory_path + filename
+    cycle.write("MusicXML", file_path)
+
+
+def generate_tonic_triad(root_scale, tonic, string_set, voicing):
+    # generate the starting chord for this particular string set
+    triad_root = pitch.Pitch(tonic)
+    triad_root.octave = string_set[0].highest_pitch.octave
+    triad_root.transposeBelowTarget(string_set[0].highest_pitch, inPlace=True)
+
+    if voicing == Voicing.Closed:
+        tonic_triad = chord.Chord(root_scale.pitchesFromScaleDegrees([1, 3, 5], triad_root, triad_root.transpose(11)))
+    elif voicing == Voicing.Drop2_A_form or voicing == Voicing.Drop2_B_form:
+        tonic_triad = chord.Chord([triad_root, triad_root.transpose(7), triad_root.transpose(16)])
+    else:
+        raise Exception("invalid voicing passed")
+
+    return tonic_triad

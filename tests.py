@@ -64,12 +64,56 @@ def full_cycle_test():
     cycle.show()
 
 
-def cycle36_drop2_test():
+def drop2_test():
     tonic = 'C'
     sc = scale.MajorScale(tonic)
     root = sc.pitchFromDegree(1)
     tonic_triad = chord.Chord([root, root.transpose(7), root.transpose(16)])
-    cycle = generate_cycle_pairs(sc, tonic_triad, "3/6", voicing_type=Voicing.Drop2)
+
+    cycle = generate_cycle_pair(sc, tonic_triad, "3/6", voicing_type=Voicing.Drop2_A_form)
+    cycle.show()
+
+    cycle = generate_cycle_pair(sc, tonic_triad, "4/5", voicing_type=Voicing.Drop2_A_form)
+    cycle.show()
+
+    cycle = generate_cycle_pair(sc, tonic_triad, "2/7", voicing_type=Voicing.Drop2_A_form)
+    cycle.show()
+
+
+def cycle36_drop2_range_test():
+    tonic = 'C'
+    sc = scale.MajorScale(tonic)
+    string_set = (GuitarRange.get_string(4), GuitarRange.get_string(3), GuitarRange.get_string(1))
+    # generate the starting chord for this particular string set
+    triad_root = pitch.Pitch(tonic)
+    triad_root.octave = string_set[0].highest_pitch.octave
+    triad_root.transposeBelowTarget(string_set[0].highest_pitch, inPlace=True)
+    tonic_triad = chord.Chord([triad_root, triad_root.transpose(7), triad_root.transpose(16)])
+    cycle = generate_cycle_pair(sc, tonic_triad, "3/6", note_ranges=string_set, voicing_type=Voicing.Drop2_A_form)
+    cycle.show()
+
+
+def cycle3_drop2_range_test():
+    tonic = 'C'
+    sc = scale.MajorScale(tonic)
+    string_set = (GuitarRange.get_string(4), GuitarRange.get_string(3), GuitarRange.get_string(1))
+    triad_root = pitch.Pitch(tonic)
+    triad_root.octave = string_set[0].highest_pitch.octave
+    triad_root.transposeBelowTarget(string_set[0].highest_pitch, inPlace=True)
+    tonic_triad = chord.Chord([triad_root, triad_root.transpose(7), triad_root.transpose(16)])
+    cycle = generate_full_cycle(sc, tonic_triad, generate_drop2_matrix(cycle3matrix), note_ranges=string_set)[0]
+    cycle.show()
+
+
+def cycle6_drop2_range_test():
+    tonic = 'C'
+    sc = scale.MajorScale(tonic)
+    string_set = (GuitarRange.get_string(4), GuitarRange.get_string(3), GuitarRange.get_string(1))
+    triad_root = pitch.Pitch(tonic)
+    triad_root.octave = string_set[0].highest_pitch.octave
+    triad_root.transposeBelowTarget(string_set[0].highest_pitch, inPlace=True)
+    tonic_triad = chord.Chord([triad_root, triad_root.transpose(7), triad_root.transpose(16)])
+    cycle = generate_full_cycle(sc, tonic_triad, generate_drop2_matrix(cycle6matrix), note_ranges=string_set)[0]
     cycle.show()
 
 
@@ -78,7 +122,7 @@ def cycle36_drop3_test():
     sc = scale.MajorScale(tonic)
     root = sc.pitchFromDegree(1)
     tonic_triad = chord.Chord([root, root.transpose(16), root.transpose(20)])
-    cycle = generate_cycle_pairs(sc, tonic_triad, "3/6")
+    cycle = generate_cycle_pair(sc, tonic_triad, "3/6")
     cycle.show()
 
 
@@ -86,7 +130,7 @@ def cycle36_test():
     tonic = 'C'
     sc = scale.MajorScale(tonic)
     tonic_triad = chord.Chord(sc.pitchesFromScaleDegrees([1, 3, 5], 'C5', 'B5'))
-    cycle = generate_cycle_pairs2(sc, tonic_triad, "3/6")
+    cycle = generate_cycle_pair(sc, tonic_triad, "3/6")
     cycle.show()
 
 
@@ -94,7 +138,7 @@ def cycle36_write_file_test():
     tonic = 'C'
     sc = scale.MajorScale(tonic)
     tonic_triad = chord.Chord(sc.pitchesFromScaleDegrees([1, 3, 5], 'C5', 'B5'))
-    cycle = generate_cycle_pairs(sc, tonic_triad, "3/6")
+    cycle = generate_cycle_pair(sc, tonic_triad, "3/6")
     cycle.metadata = metadata.Metadata()
     cycle.metadata.title = "Cycle 3/6 progression in C Major"
     cycle.metadata.composer = "Chord Cycle Generation Software"
@@ -104,8 +148,8 @@ def cycle36_write_file_test():
 def cycle45_test():
     tonic = 'C'
     sc = scale.MajorScale(tonic)
-    tonic_triad = chord.Chord(sc.pitchesFromScaleDegrees([1, 3, 5], 'C5', 'B5'))
-    cycle = generate_cycle_pairs(sc, tonic_triad, "4/5")
+    tonic_triad = chord.Chord(sc.pitchesFromScaleDegrees([1, 3, 5], 'C4', 'B4'))
+    cycle = generate_cycle_pair(sc, tonic_triad, "4/5")
     cycle.show()
 
 
@@ -113,7 +157,7 @@ def cycle27_test():
     tonic = 'C'
     sc = scale.MajorScale(tonic)
     tonic_triad = chord.Chord(sc.pitchesFromScaleDegrees([1, 3, 5], 'C5', 'B5'))
-    cycle = generate_cycle_pairs(sc, tonic_triad, "2/7")
+    cycle = generate_cycle_pair(sc, tonic_triad, "2/7")
     cycle.show()
 
 
@@ -122,14 +166,14 @@ def cycle36_arbitrary_scale_test():
     # the natural minor version
     sc = scale.ConcreteScale(pitches=['E4', 'F#4', 'G4', 'A4', 'B4', 'C#5', 'D#5'])
     tonic_triad = chord.Chord(sc.pitchesFromScaleDegrees([1, 3, 5], 'E5', 'D#6'))
-    cycle = generate_cycle_pairs(sc, tonic_triad, "3/6")
+    cycle = generate_cycle_pair(sc, tonic_triad, "3/6")
     cycle.show()
 
 
 def cycle36_ab_test():
     sc = scale.MajorScale('Ab')
     tonic_triad = chord.Chord(sc.pitchesFromScaleDegrees([1, 3, 5], 'Ab4', 'G5'))
-    cycle = generate_cycle_pairs(sc, tonic_triad, "3/6")
+    cycle = generate_cycle_pair(sc, tonic_triad, "3/6")
     cycle.insert(0, key.KeySignature(-4))
     cycle.show()
 
@@ -137,7 +181,7 @@ def cycle36_ab_test():
 def cycle36_a_harmonic_minor_test():
     sc = scale.HarmonicMinorScale('A')
     tonic_triad = chord.Chord(sc.pitchesFromScaleDegrees([1, 3, 5], 'A4', 'G5'))
-    cycle = generate_cycle_pairs(sc, tonic_triad, "3/6")
+    cycle = generate_cycle_pair(sc, tonic_triad, "3/6")
     cycle.insert(0, key.KeySignature(0))
     cycle.show()
 
@@ -145,7 +189,7 @@ def cycle36_a_harmonic_minor_test():
 def cycle36_a_minor_test():
     sc = scale.MinorScale('A')
     tonic_triad = chord.Chord(sc.pitchesFromScaleDegrees([1, 3, 5], 'A4', 'G5'))
-    cycle = generate_cycle_pairs(sc, tonic_triad, "3/6")
+    cycle = generate_cycle_pair(sc, tonic_triad, "3/6")
     cycle.insert(0, key.KeySignature(0))
     cycle.show()
 
@@ -170,40 +214,30 @@ def range_check_test():
     tonic_triad = chord.Chord(sc.pitchesFromScaleDegrees([1, 3, 5], 'C5', 'B5'))
     # create a string set to do the range checking with
     string_set = (GuitarRange.A_string, GuitarRange.D_string, GuitarRange.G_string)
-    cycle = generate_cycle_pairs(sc, tonic_triad, "2/7", string_set)
+    cycle = generate_cycle_pair(sc, tonic_triad, "2/7", string_set)
     cycle.show()
 
 
 def generate_cycles_for_all_string_sets_test():
     tonic = 'C'
     root_scale = scale.MajorScale(tonic)
-    pair_type = '2/7'
-    generate_cycle_pairs_for_all_string_sets(root_scale, tonic, pair_type)
+    pair_type = '3/6'
+    voicing = Voicing.Drop2_A_form
+    cycle_pairs = generate_cycle_pairs_for_all_string_sets(root_scale, tonic, pair_type, voicing)
+    for pair in cycle_pairs:
+        write_cycle_to_xml(pair, "C:\\Temp\\Chord_scale_testing\\")
 
 
-def new_generate_sub_cycle_test():
-    # string_set = (GuitarRange.A_string, GuitarRange.D_string, GuitarRange.G_string)
+def drop2_542_cycle36_test():
     tonic = 'C'
     sc = scale.MajorScale(tonic)
-    root = sc.pitchFromDegree(1)
-    tonic_triad = chord.Chord([root, root.transpose(4), root.transpose(7)])
-    # sub_cycle = generate_sub_cycle(sc, tonic_triad, cycle2matrix[0], string_set)
-    sub_cycle, next_chord = generate_sub_cycle_2(sc, tonic_triad, cycle2matrix[0])
-    sub_cycle.append(next_chord)
-    sub_cycle.show()
+    voicing = Voicing.Drop2_A_form
+    # create a string set to do the range checking with
+    string_set = (GuitarRange.A_string, GuitarRange.D_string, GuitarRange.G_string)
+    tonic_triad = generate_tonic_triad(sc, tonic, string_set, voicing)
 
-
-def new_generate_full_cycle_test():
-    tonic = 'C'
-    sc = scale.MajorScale(tonic)
-    root = sc.pitchFromDegree(1)
-    root.transpose(12, inPlace=True)
-    tonic_triad = chord.Chord([root, root.transpose(4), root.transpose(7)])
-
-    cycle, next_chord = generate_full_cycle_2(sc, tonic_triad, cycle3matrix)
-    m = stream.Measure()
-    m.append(next_chord)
-    cycle.append(m)
+    # check_note_ranges_and_transpose(tonic_triad.pitches, string_set)
+    cycle = generate_cycle_pair(sc, tonic_triad, "3/6",  string_set, voicing)
     cycle.show()
 
 
@@ -211,10 +245,10 @@ def new_generate_full_cycle_test():
 # sub_cycle_test()
 # full_cycle_test()
 # cycle27_test()
-cycle36_test()
+# cycle36_test()
 # cycle45_test()
 # cycle36_drop3_test()
-# cycle36_drop2_test()
+# drop2_test()
 # cycle36_Ab_test()
 # cycle36_a_harmonic_minor_test()
 # cycle36_a_minor_test()
@@ -223,5 +257,7 @@ cycle36_test()
 # range_check_test()
 # cycle36_write_file_test()
 # generate_cycles_for_all_string_sets_test()
-# new_generate_sub_cycle_test()
-# new_generate_full_cycle_test()
+# cycle36_drop2_range_test()
+# cycle3_drop2_range_test()
+# cycle6_drop2_range_test()
+drop2_542_cycle36_test()

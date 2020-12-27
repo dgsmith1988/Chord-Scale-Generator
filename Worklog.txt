@@ -521,5 +521,179 @@ Hmm... it might be useful to redefine this generate sub_cycle function to return
 next chord as well... This would help with the issue I had before I think... Hmm...
 although some of the patterns didn't follow exactly the same format in terms of the
 chord inversions which they started on... Hmm... I think I might have coded for that
-in the data structures which contain the voice leading patterns...
+in the data structures which contain the voice leading patterns... I'll have to look
+into this later...
 
+Hmm... it might not even be necessary as the same voiceleading pattern seems to apply
+throughout. If memory serves correctly I wrote those to have it so depending on the
+chord inversion you started with, you would have all the options you needed...
+
+Hmm... I believe I got it...
+
+Hmm... so what do we do now? We generate the various three sub_cycles. Hmm... Although
+something might come up with the matrix pages but we can deal with that later...
+
+Hmm... so what do I do here? I need to generate three sub-cycles to create a fully
+cycle. How do I do this? Generate one and then use the chord which is returned by the
+cycle as the seed for the next sub_cycle...
+
+Hmm... So what I need to do here is change the order in which tranposition matricies
+occur...
+
+Hmm... this is bizarre... It seems some sort of unexpected behavior occurs when the
+measure is added to the stream and the time signautre is already there... I wonder
+what's going on... I'll need to check the append() function...
+
+Hmm... So I definitely got the functionality I was interested in working... Now to save
+my place and then replace the old code with this new functionality. I'll also have to
+re-order some of the matricies in order to make sure the transitions occur properly...
+
+Hmm... or perhaps only the first measure in each stream needs to have the time signature
+object embedded in it... let's try that...
+
+Ahaha! I got it!
+
+And the various cycles seem to be working nicely! Now to make it so there's one measure
+on every line.
+
+Hmmm... It would be interesting to explore this voice concept more as a potential way
+for organizaing and manipulating the music...
+
+Hmm... So I've figured out how to add a line break after every measure... Now I need how to 
+determine how to strech the last measure so it fits the entire last line... I could
+just add an empty measure... Although that wouldn't be as clean... Or one last measure
+where I end on the beginning chord...
+
+Hmm... perhaps I don't need to necessarily export them to PDF. The MusicXML files are handy
+and anyone could do whatever they want with them. Hmm... Plus being able to hear a bit 
+of playback could help with practicing. Although the PDF would be nice for a cleaner
+view of the material while practicing. Hmm... Yeah, let's just keep it to MusicXML format
+files for the time being...
+
+12/06/2020
+So now I need to figure out how to handle the drop 2 voicings. Hmm... Let's see here... I mean I would need to decide on which of the fingerings to use... But having a clear starting
+point would be nice. A good departure point would be to start with one voicing, that one being something like 6-5-3 and then branching out from there. Hmm... changing the voicing used
+would just be changing the permutations of the strings used to generate the different range checks. That's really not too bad. Hmm... I mean I could theoretically use any sort of 
+string set and the algorithm would figure out how to change the notes and everything to make it all work. Hmm... Yeah, figuring out the different other forms would mainly just be
+figuring out how to generate the permuatations successfully. Hmm... It's really like before the rest of the code I need a way to determine what permutations of the strings to use.
+This will ultimately be decided by the voicing passed... This parameter would mainly change how the loops are configured... 
+
+So let's iterate them out...
+
+For the Drop 2 - A Form we get
+6-5-3
+5-4-2
+4-3-1
+
+So that's 3 sets of three strings. Hmm... I wonder if there's a way to more precisely determine these things mathematically to know for sure that I have established all the different
+possible permutations. Hmm... that would be an interesting thing to look into at another point...
+
+For the Drop 2 - B Form we get
+6-4-3
+5-3-2
+4-2-1
+
+Hmm... So that's only 3 forms there...
+
+What about the closed triads?
+6-5-4
+5-4-3
+4-3-2
+3-2-1
+
+That's four different sets of three strings each. Hmm... that's not too bad. I mean now we just need a way of programmatically generating the 
+
+So I need a way of programmatically generating the three permutations from a parameter... Hmmm... We could try and programmatically generate all the different possibilities but it
+might be easier to hard code them. Or if there was a way to pass a function which generates the different formulas to determine the string indicies that would be cool as well. I mean
+you can pass functions in other languages so I don't see why you couldn't do something similar here either... Hmm... it seems like I would have to write more functions than it's worth...
+I'm sure there's some sort of a coding technique which could be used here to facilitate things better.
+
+Hmm... so I need to modify the code to turn the matricies into drop 2 matricies. I have code which does this for a matrix page. I could do this for each page in the matrix or I could
+write a function to do it to the entire matrix... it might be easier to use the pre-existing function to do this to for each page in a matrix... that sounds like a good plan...
+
+Hmm... I'm not seeing any sort of transposition or anything within these functions based on the ranges specified by the strings... Hmm... it really seems as if something is wrong with
+the range checking and transposition functions... hmm... I'm not sure if I had anticipated how the drop 2 triads would work here... ahh... That's one of the issues here as well... I
+don't necessarily start out with a chord in a drop 2 inversion... Hmm... getting closer... Hmm... Given that the other chord progressions are generated correctly, this definitely points
+to the range_checking_function as being the issue... hmm... this is bizarre... it seems to recover eventually as well... might be some sort of a memory reference/pointer issue? not
+sure...
+
+12/23/2020
+Hmm... This is quite strange. The chord recovers and this makes no sense based on my current comprehension of things. Hmm... I could debug this by recreating the conditions on a smaller
+scale. So how do I do that? I need to use the same range parameters... Hmm... I mean I could theoretically recreate this. Although I do have the stack and all the various function calls
+to help me debug everything... 
+
+12/24/2020
+Okay... so what to do here? It looked to be occurring in the 3rd sub-cycle. I should run the code to try and re-create that issue... Hmm... This is bizarre... It might be some sort of a
+memory reference thing based on how music21 handles the various object references. Although I thought I returned all new objects/deep copies each time... Perhaps I went wrong somewhere...
+Hmm... How could I test this? I could generate each cycle independently... Hmm... Or I might have already checked that in a way with the other code where I was able to generate the
+cycle pair successfully... However in that case I didn't do any sort of range checking... So hmm... I should definitely run it just on the cycle three and then the cycle6 with
+ranges enforced to see if the results are correct. From there we can see what the differences in the executions are to isolate where the bug might be...
+
+Ahaha! I believe I have found the bug! Hmm... I think I understand why this is occurring... This is becasue the chord_as_list object only transposes the notes if there is a non-zero
+element in the row for that particular voice. Given that we generate a chord based on the pitches currently in the list, and we don't always have unique values in them on each iteration
+(i.e. common chord tones don't change between one chord and the next) we don't have unique pitches across the spectrum. This means later on if a chord is out of range and needs to be
+transposed, that any of the other pre-existing chords who have this music21 pitch object in them will also have their pitch value transposed since things operate by memory references
+in music21...
+
+Hmm... seems like you've got it now but it also seems like you have an issues with the starting/ending chords for the 3/6 cycles... It would also be good to test this with all the 
+various possible keys and chord voicings. However that might take some time and is probably something best left to being done with a guitar in hand to make sure everything works
+as intended. Then we could try them out on the guitar... Hmm... Although having these as a mental exercise is extremely useful as well... Hmm... so what to do now? I can focus on the
+other aspects like making sure the .xml files are done correctly as well as the code is clean in general...
+
+So how do I do this? There's a path which is necessary. This will point to the directory in which the XML files should be output. A default path should be specified... Hmm... I'm not
+sure if it's possible to create variables with all these different strings already specified earlier so the title and filename can be generated from the same set of data to simplify
+things.
+
+12/27/2020
+Okay... So what to do here? Focus on getting the output files working and done first...
+Hmm... Although how do I want to do this? It would be nice if I could create an output
+file for any arbitrary cycle. This way I wouldn't be relegated to specifically the function
+which generates all the permuatations on the string sets... Ultimately this would be a
+lot more modular and support more functionality. Anyone could generate a cycle and then
+pass it as a function to export it. That makes a lot more sense. So what do we need here
+then? We need a function which takes a cycle and a path to a directory where it saves
+the .XML file for the cycle. Hmm... I mean really this isn't too complicated and this
+functionality is common enough that it warrants it's own function. This function would
+have to extract all the meta-data from the cycle to be able to generate the title...
+That's a good point...
+
+Now we need to figure out how to extract the various pieces of information from the
+metadata to generate the file name here... Hmm... so I will have to take the metadata
+title and figure out how to format it to make sure it can be written as a file. this
+shouldn't be too hard... just some basic string processing and conversion methods...
+
+Hmm... what do we need to do? Remove the // from the "Cycle" signifier as that will  
+inadvertnetly end up creating a directory
+
+1. Remove // from cycle signifier
+2. 
+
+Hmm... what do I want it to look like?
+
+Cycle 36 Progression in C major; String Set 4-3-1; Drop 2 Triads
+
+That seemed straight forward enough... hmm... What about this part now? I need to figure
+out how to get these starting chords to be correct. One thing which I don't do is check 
+to make sure the starting chord is within range on the current strings. This seems to be
+a corner case where the starting note belongs to the upper range one the lowest string.
+Hmm... Also, this shape in and of itself as outside the range... This needs to be 
+fixed...
+
+Hmm... This range checking/transposition function doesn't seem to be working...
+Hmm... I see what's going on here... This is really a hard thing to describe in terms
+of determing what frets to restrict things to... Although theoretically I could write
+a function/logic which analyzes the chord voicing as well as string set and then ensures
+that there's only one voicing per string set. From there this logic would make the
+generated cycles a lot more coherent in a certain sense... I'd have to look at the
+range of the intervals in the different voicings to solve this one entirely...
+
+Hmm... although it might be useful to have some sort of a function or return value which
+tells you if it's impossible to get the voicing to work on the specified string range...
+This all really depends on the different voicings you use as well as the strings selected.
+
+Hmm... I mean for now I can work on each output file as I use them... It would take a
+long time to figure this out... well maybe not a long time but it would be something i
+need to sit out and design and i don't have the mental space for it now... I think I'm
+definitely at the point where I can start generating different cycles to practice with
+and this will help me debug the code and figure out the different test cases needed to
+re-create the issues... This is good enough for the moment...
