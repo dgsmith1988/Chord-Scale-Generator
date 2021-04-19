@@ -124,6 +124,12 @@ class NoteRange:
             return NoteRange.ReturnValue.InRange
 
 
+class ChordCompareReturn(Enum):
+    Lower = -1
+    Same = 0
+    Higher = 1
+
+
 class GuitarString(NoteRange):
     # Todo: Rethink this name for the class
     class StringNumber(Enum):
@@ -142,12 +148,12 @@ class GuitarString(NoteRange):
 class GuitarRange:
     # this class is used to limit the chord voicings to keep them from open strings to the 15th fret. the note values
     # here correspond to how guitar is notated as opposed to how it's actually pitched to make reading the scores easier
-    E_string_low = GuitarString(pitch.Pitch('E3'), pitch.Pitch('G#4'), GuitarString.StringNumber.E_string_low)
-    A_string = GuitarString(pitch.Pitch('A3'), pitch.Pitch('C#5'), GuitarString.StringNumber.A_string)
-    D_string = GuitarString(pitch.Pitch('D4'), pitch.Pitch('F#5'), GuitarString.StringNumber.D_string)
-    G_string = GuitarString(pitch.Pitch('G4'), pitch.Pitch('B5'), GuitarString.StringNumber.G_string)
-    B_string = GuitarString(pitch.Pitch('B4'), pitch.Pitch('D#6'), GuitarString.StringNumber.B_string)
-    E_string_high = GuitarString(pitch.Pitch('E5'), pitch.Pitch('G#6'), GuitarString.StringNumber.E_string_high)
+    E_string_low = GuitarString(pitch.Pitch('F3'), pitch.Pitch('G#4'), GuitarString.StringNumber.E_string_low)
+    A_string = GuitarString(pitch.Pitch('Bb3'), pitch.Pitch('C#5'), GuitarString.StringNumber.A_string)
+    D_string = GuitarString(pitch.Pitch('D#4'), pitch.Pitch('F#5'), GuitarString.StringNumber.D_string)
+    G_string = GuitarString(pitch.Pitch('G#4'), pitch.Pitch('B5'), GuitarString.StringNumber.G_string)
+    B_string = GuitarString(pitch.Pitch('C5'), pitch.Pitch('E6'), GuitarString.StringNumber.B_string)
+    E_string_high = GuitarString(pitch.Pitch('F5'), pitch.Pitch('G#6'), GuitarString.StringNumber.E_string_high)
 
     @staticmethod
     def get_string(string_number):
@@ -298,17 +304,6 @@ def generate_cycle_pairs_for_all_string_sets(root_scale, tonic, pair_type, voici
     cycle_pairs = []
     for strings in iteration_function(voicing):
         string_set = (GuitarRange.get_string(strings[0]), GuitarRange.get_string(strings[1]), GuitarRange.get_string(strings[2]))
-        # # generate the starting chord for this particular string set
-        # triad_root = pitch.Pitch(tonic)
-        # triad_root.octave = string_set[0].highest_pitch.octave
-        # triad_root.transposeBelowTarget(string_set[0].highest_pitch, inPlace=True)
-        #
-        # if voicing == Voicing.Closed:
-        #     tonic_triad = chord.Chord(root_scale.pitchesFromScaleDegrees([1, 3, 5], triad_root, triad_root.transpose(11)))
-        # elif voicing == Voicing.Drop2_A_form or voicing == Voicing.Drop2_B_form:
-        #     tonic_triad = chord.Chord([triad_root, triad_root.transpose(7), triad_root.transpose(16)])
-        # else:
-        #     raise Exception("invalid voicing passed")
 
         tonic_triad = generate_tonic_triad(root_scale, tonic, string_set, voicing)
 
@@ -336,7 +331,9 @@ def generate_cycle_pairs_for_all_string_sets(root_scale, tonic, pair_type, voici
 
         # add an ending measure to make the line breaks and formatting a bit cleaner/more consistent
         m = stream.Measure()
-        last_chord = tonic_triad.__deepcopy__()
+        last_chord_as_list = list(tonic_triad.pitches)
+        check_note_ranges_and_transpose(last_chord_as_list, string_set)
+        last_chord = chord.Chord(last_chord_as_list)
         last_chord.duration = duration.Duration(4.0)
         m.append(last_chord)
         r = note.Rest()
@@ -344,7 +341,11 @@ def generate_cycle_pairs_for_all_string_sets(root_scale, tonic, pair_type, voici
         m.append(r)
 
         cycle_pair[2].append(m)
+
+        ensure_unique_chords(cycle_pair)
+        # cycle_pair.show()
         cycle_pairs.append(cycle_pair)
+
     return cycle_pairs
 
 
@@ -382,8 +383,8 @@ def write_cycle_to_xml(cycle, directory_path):
 def generate_tonic_triad(root_scale, tonic, string_set, voicing):
     # generate the starting chord for this particular string set
     triad_root = pitch.Pitch(tonic)
-    triad_root.octave = string_set[0].highest_pitch.octave
-    triad_root.transposeBelowTarget(string_set[0].highest_pitch, inPlace=True)
+    triad_root.octave = string_set[0].lowest_pitch.octave
+    triad_root.transposeAboveTarget(string_set[0].lowest_pitch, inPlace=True)
 
     if voicing == Voicing.Closed:
         tonic_triad = chord.Chord(root_scale.pitchesFromScaleDegrees([1, 3, 5], triad_root, triad_root.transpose(11)))
@@ -393,3 +394,48 @@ def generate_tonic_triad(root_scale, tonic, string_set, voicing):
         raise Exception("invalid voicing passed")
 
     return tonic_triad
+
+
+def compare_chords(chord_1, chord_2):
+    # this could be re-written in a a much slicker fashion in the future, you could always overload the comparison
+    # operators...
+
+    if len(chord_1) != len(chord_2):
+        raise Exception("chords passed are different lengths")
+
+    if chord_1 == chord_2:
+        return ChordCompareReturn.Same
+
+    compare_pitches = []
+    for chord_tone_1, chord_tone_2 in zip(chord_1.pitches, chord_2.pitches):
+        compare_pitches.append(chord_tone_1 > chord_tone_2)
+
+    if sum(compare_pitches) == 0:
+        # as we've already established that the chords differ by at least one note then if the array returned from the
+        # previous comparison is all false, we can conclude that chord_1 is "lower" than chord_2
+        return ChordCompareReturn.Lower
+    else:
+        # given that compare_pitches can only contain positive integers, if its sum isn't zero then it must be positive
+        # which would then mean that chord_1 is "higher" than chord_2
+        return ChordCompareReturn.Higher
+
+
+def find_lowest_chord(stream_to_check):
+    # scan through a stream "s" and find the lowest chord. i reckon this could easily be modified to handle the
+    # searching for other extreme (i.e. the highest chord as well). work on the naming for the argument passed. there
+    # might be a way to sort the data ahead of time to make this more efficient/elegant
+    chords = stream_to_check.recurse(includeSelf=True, classFilter='Chord')
+    lowest = chords[0]
+    for c in chords[1:]:
+        if compare_chords(c, lowest) == ChordCompareReturn.Lower:
+            lowest = c
+
+    return lowest
+
+
+def ensure_unique_chords(stream_to_check):
+    lowest = find_lowest_chord(stream_to_check)
+    upper_bound = lowest.transpose(12)
+    for c in stream_to_check.recurse(includeSelf=True, classFilter='Chord'):
+        if compare_chords(c, upper_bound) != ChordCompareReturn.Lower:
+            c.transpose(-12, inPlace=True)

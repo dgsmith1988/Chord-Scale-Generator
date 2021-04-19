@@ -697,3 +697,168 @@ need to sit out and design and i don't have the mental space for it now... I thi
 definitely at the point where I can start generating different cycles to practice with
 and this will help me debug the code and figure out the different test cases needed to
 re-create the issues... This is good enough for the moment...
+
+02/18/2021
+Hmm... I think I'm definitely leaning more towards the Chris Buono approach of not using open strings to practice this... Hmm... I also feel a bit of pain in my hand so that's probably
+a good sign I shouldn't be doing any sort of technical exercises like that on guitar... Hmm... So I think I've fixed that issue... It was more that I didn't specify the parameters 
+correctly I believe... Damn... I think all my guitars definitely need a setup at this point in time. And my acoustic definitely needs some TLC... Those guys should probably be kept
+in their cases with a good humidifier there to keep them from drying out... I'll need to look into something like that... Hmm... How many more different test cases should I run here?
+It would probably be good to run one on each of the different string sets and quickly double check the fingerings generated... What is the deal with this ending chord here? Why would
+it be up an octave? Hmm... It takes a copy of the last chord and copies that in... Hmm... So this is what? It seems to me something is modifying that chord there... Hmm... How do I 
+solve this? I could find where the chord is being modified or save a copy of the last chord before hand... Hmm... I would prefer to not have any of these functions modify anything...
+Hmm... I think i should rework this generate tonic triad function to generate the chord to appear on the lowest set of frets possible... Hmm... Or perhaps there's a way to ensure 
+there's only one possible chord voicing for each one? Hmm... But then given that we're dealing with drop2 triads here the voicings have a much larger range. But then I'm not sure if
+it will be possible to generate a fingering for each of the different... So I believe I've fixed that last chord copy issue... Hmm... Now I'll have to test this out for closed voicings
+as well as the other different cycles... Goddamn... That's a lot of testing... Although if I write out the test cases first it won't be too bad as I'll have a much better idea of what
+to do... 
+
+Hmm... Strange chord here for the starting chord... Ahh... I was incorrect... It's much more the second chord which has the issue with it... Hmm... Definitely this range checking and transposition feature needs to be checked in
+order to ensure we get voice-leading patterns that make sense... I'm not sure if this is ready to be released just yet... However I'll have to think out the different aspects associated with the range checking/transposition feature
+in general. This should be an interesting/complex problem to get involved with...
+
+04/09/2021
+Hmmm... Okay... Let's try and get this sorted out and more finalized so I could release it and use it myself (once my arms heal). Hmm... So I'm still getting that bug here... Or at
+least some sort of a strange bug regarding the transposition when chords are determined to be out of range... Hmm... Okay... So that first one technically wasn't an error. The G is
+out of bounds as we're not using the open strings here. However the second chord should be down an octave to emphasize the reverse order from before. Hmm... I could fix this here for
+this particular chord cycle however it's not clear to me this might cause problems later on... However it would be good to take the smallest change possible and then see how it changes
+everything... However this involves manually going through the different output to make sure it works... That's pretty tedious in and of itself... There has to be a better way to analyze
+these things and I think it has to do with the different intervals involved in the chord and the particular strings selected and how they manifest themselves... Hmmm... I mean it would
+be nice if this worked for other types of chords beyond just the ones specified here... I would need a more generalized method for this which was intelligent enough to determine the
+largest intervals in the chords... or hmm... it might not even be that necessary... hmm... there might also be other methods which could be explored... I might be able to keep track of
+if it's being done during an ascending part or a descending part... hmm... although maybe not... the same issue could occur in the middle of a measure... suppose you have an ascending
+line of chords and the same thing happens... hmm... so what do we do here...? Is there a way we could focus on just the bass note? Hmm... I don't think so as we have situations where
+only one note changes at once. That's the situation we have here... And that's what the basic algorithm currently in place does. It checks to make sure that all the notes currently
+in the chord are in range for the sets of strings selected. Hmm... given that we have a larger variation in chord voicings (compared to the closed triad version which Buono created)
+it would be harder to do this purely through the range avaialble on the strings. I think more what I want to do is ensure that there's onyl one unique voicing for each chord in each
+cycle. That was the goal of the cycles and ranges to some extent... Hmm... Perhaps developing another condition would be necessary... How would we enforce this uniqueness aspect? And
+do we want to favor the upper end or the lower end of the range? Perhaps it would be easy to develop both... Although for now focus on developing the lower end of the spectrum... Hmm...
+We could also use programming invariants to check the final output and make sure things are correct as we expect them to be... But let's condsider that other scenario... Perhaps 
+generating what we know to be the lowest possible chord for the given root and string set would be beneficial. Then we could use this impose another transposition condition. If we
+end up with a chord that is an octave higher than this, then we know we should transpose it downwards. Hmm... I mean you could do something similar to make it work for the upperbound...
+Or if you were going in reverse... Although that should be a fairly hard limit I think based on the nature of the strings in general... Hmm... So I think creating this upper limit chord
+and using that for comparison within the check and transpose functions would be the next step... Hmm... but then the question becomes how do I generate the upper chord for each of
+the different cycles? That's a good question itself... I mean in this case it works out that the first chord is the highest chord. This is clearly not always the case... We would have
+to know basically the entire cycle it almost seems. Well we would need to know what the lowest note we could play is and what the corresponding chord is. Unfortuantely we don't necessarily
+know the chord unless the entire cycle has been generated. Although I suppose I could deduce/calculate it based on the other information we have on the chord but how much work is that
+compared to scanning through the finalized generated sequences...? That's a good question... Hmm... it's beginning to seem like it might be easier to enforce the uniqueness aspect after
+generating the entire sequence. It would be somewhat of more of a post-processing type of thing. So we find the lowest chord in the entire sequence. Then we scan through the rest of the
+sequence to make sure that none of the chords are an octave above it. Hmm... We could also theoretically do this in reverse but use the highest possible chord... I believe the stream
+structure lends itself extremely well to this... well I'm fairly certain I know how to do this now it's just a matter of writing it out...
+
+Steps:
+
+1. Scan through the cycle to find the lowest chord
+2. Scan through again to ensure that no chords are an octave or more above it.
+3. If found then transpose accordingly
+
+Hmm... There's a few different things here. I mean we are using Chord objects here. Figuring out how to do the comparison between two Chord objects would be necessary. Hmmm... So I can
+get all of the Chords in a stream. Depending on how things are organized within the various stream objects this could be extremely beneficial... Hmmm... It seems as if I can get the
+notes from the chords and do the comparisons individually... Pitches is more what we want as it contains the octave information...
+
+04/10/2021
+Hmm... So it seems as if you don't really need anything more than a stream in this case. the stream provides the upper/lower limit itself... Hmm... so we need a way to find the 
+highest/lowest chord in the stream. That shouldn't be too hard, it would just be necessary to develop the conditions to establish this. we can get all the chords in a stream and
+since music21 stores things by reference (and we don't plan on doing any sort of editing to this chord/music21 object) it should be sufficient to just grab all the chords and compare
+them one by one... although there's probably a better method for this... however... Hmm... i mean we can't really assume anything regarding how these chords are stored in the streams...
+this would be some good old fashioned unsorted data... Hmm... So how should this compare chords function work? What are the possible scenarios? 
+	1. chord 1 is higher than chord 2
+	2. chord 1 is the same as chord 2
+	3. chord 1 is lower than chord 2
+	
+So how are we defining lower and higher here? Hmm... For now lets just stick to dealing with chords that have the same number of notes. In this case in order to consider a chord higher
+than another chord we would need to make sure at least one of its chord tones is higher than the others... hmm... perhaps that isn't worded correctly... so each chord has the same number
+of notes... Hmm... Also I would need to access the pitches attribute to be able to do this but thankfully the pitches class implements the comparison operators... So how do we define
+the higher/lower concepts here in terms of the comparison function... hmm... i mean i could overload the comparison functions technically... in a way that's what i'm looking for here...
+Hmm... It seems they've already done the equality operator for chords... Although I'm not sure how the comparison is done here... hmm... I mean having this notition of using the same
+actual instances fo each object in the cycles would be nice... technically all the cycles really are are the same chords in a different arrangement... Generating the cycles via modifying
+existing streams could be beneficial... hmm... this chord comparison function is more complicated than i had imagined at first... so what are the conditions necessary for a chord
+to be considered higher? all of the notes need to be the same and at least one note is higher? say you have n notes total. n-1 notes need to be the same and 1 needs to be higher...
+hmm... perhaps there's something in set operations which would help facilitate this further... Hmm... Or it seems as if there are list comparisons... I should investigate that more...
+hmm... this problem just seems really messy in general and there's no easy way to solve it... although some of the element wise comparison functions in matlab would really be nice here...
+perhaps there is similar functionality for lists... There might be a way to do thise by equating true/fasle with 1/0 and summing over the values... i believe that should handle things
+nicely... Hmmm... So it seems if the sum function should be able to do this to a list. I also have the np library if need be... Hmm... So lets see here... I would need to go through
+and compare all the pitches... So let's see here... How do I go about doing this...? it all depends on the comparison function used... Hmm... it already treats true/false as 1/0 when
+putting the list into sum... that's nice... now the next step is to figure out how to interepret the results of the summation for our purposes here...
+
+if all the notes are greater in chord_1 then the sume will be 3
+if two of the notes are greater in chord_1 then the sum will be 2
+if 1 of the notes are greater in chord_1 then the sum will be 1
+
+Hmm... what about the scenario where the notes are the same? we're missing out on that one here... However at this point in the function we can assume that the chords aren't the same
+as we do that comparison first... this means the chords differ at least by 1 pitch... so that means we could use the >= function... or does it? i mean why would we need to use it?
+ahh... we need to consider when they differ by one note... hmm... or do we... suppose we have the chords ACE and ACF. The first two will return false and the third will return true...
+well no... I'm thinking in reverse here... they all will return false... and this would be true since technically the chord would be lower... but since we now know that the chords 
+differ by at least one note, it's a matter of finding that note in a way... hmm... i mean damn... this is acutally a tricky concept to define well when you think about it as there
+as so many different possibilities for figuring out how to define this... I mean there are many different ways you could try and figure out how to define the differences in the chord
+ranges/sizes here... Interesting... This is where more precisely defining the criteria would be necessary here... That will give it an unambiguous manner for interpretation/definition...
+
+04/11/2021
+Hmmm... Okay... lets continue developing this algorithm... Hmm... so at this point we know the chords differ by at least one pitch... What do we then do with this information? We use
+it to figure out how to interpret the results of the comparison function... So how do we interpret this greater than function in the conext of at least one of the notes being different?
+Well if it returns all false then that means each of the pitches in chord_1 is less than or equal to all the pitches in chord_2. However at the same time since at least one chord tone
+is different then if all are false then at least one of these chord tones is lower and the rest are equal or lower so that would then make it so chord_1 is "lower" than chord_2. Hmm...
+It might be possible to make this more efficient... What about the case where at least one note is greater? Hmm... So I'm fairly confident I have the comparison function working correctly...
+Let's get back to the overall algorithm... I first need to go through and find the lowest chord in the sequence. This should work for all streams since a stream just contains another
+stream... Well we'll see I reckon...
+
+So now I need to go through and find the lowest chord in the stream... hmm... this doesn't seem go dive deeper into the structures of the streams at all... Hmm... So it appears as if
+I need to flatten the stream first or use the recurse method... Hmm... I'm more partial to the recurse method myself as it doesn't destroy the underlying data structure and I'd have
+the ability to display which sub-structure I'm exploring first...
+
+Hmm... So this is getting more complicated than I thought... If I was to make a more generic one then this would take longer... But there are assumptions I can make regarding the
+composition of the incoming streams... I will know what those are. I mean either we get a sub-cycle, a full cycle or a cycle pair. a sub-cycle is contained within a measure. a full
+cycle contains multiple sub-cycles (stored in measures) but is inherently a stream itself. Hmm... And a cycle pair... A cycle pair is a stream which contains two cycles... So before
+we operate here we should establish which type of structure we're dealing with. In order to do this I'll need to check the depth of the stream... Hmm... well maybe... There seems to
+be a class filter as part of the function signature... Hmm... yes... This will do much better... hmm... so what do we do now... Hmm... how do we do this in terms of initializing things?
+We need to have the first chord become the lowest chord... how do we do that? or we could set this to be the highest possible chord representable with this... hmm... did it the other
+way...
+
+hmm... so... lets see here... lowest holds the current "lowest" chord. this is intialized as the first chord... so then we go and compare it to the rest of the chords... well we compare
+the lowest with the next chord. given that we have unsorted data this is one way... hmm... don't worry too much about it at the moment... but lets see here... so we compare it to the
+next chord and if that chord is "lower" then the lowest variable is set to that... hmm... so lowest always contains the currently established lowest chord... hmm... after it iterates
+through the entire length of chords then it is guaranteed to be the lowest chord... hmm... how could i test this? plug a stream into it and make sure it returns the lowest chord...
+hmm... so this seems to work...
+
+hmm... so how is this going to operate? well will it take a cycle? a sub-cycle? a cycle-pair? Hmm... It would be nice if it was able to operate on all of them... well perhaps it can
+since i believe we will be given references to the music21 objects and this would be useful... hmm.... could we do this at the same time as when we find the min? well maybe but I don't
+want to think about it now... I'd prefer separating this functionality anyways... So now how do we use this? If this is the defined lowest chord then we need to make sure that if
+we find any chord which is greater than or equal to the octave transposition of it is tranposed down an octave so we have a unique set of chords in that there's only one voicing for
+each...
+
+Hmm... So how does this work... If a chord isn't lower than the upper bound (which is the lowest chord transposed up an octave) then we need to transpose that chord down an octave...
+Hmm... But given that the chord is either the same as the lowest chord (transposed) or at least one of it's notes is higher than we know that transposing it down an octave will have
+a fingering/voicing which is consistent with the lower range bournd as defined by the guitar strings... Interesting... I'm fairly confident this will work so lets give it awhirl...
+
+Hmm... I mean this honestly seems like its solved the issue... Given that we're not using open strings then this chord is voiced in the appropriate manner i would say... well that's a
+nice chunk of functionality to check off... Hmm... Although I mean I think ideally I would add this to the cycle pair or the cycles function... hell... or any of the functions to 
+make sure the range checking is done correctly on the various strings... I'd need to re-write the function which tests the "ensure" unique aspect but that's not too bad... man... this
+really makes me miss writing sogtware in general...
+
+04/14/2021
+Hmm... Okay... So lets see here... so where should I put this code to check to ensure the chords are unique? this should only happen if there's a note range or something I think...
+that's definitely what it seems like... Hmm... Perhaps it should be another flag or optoin? I mean what if you don't mind things going beyond a specific range? That's a good point...
+Yeah, I think this would be best as something which could be use afterwards... Or hmm... it definitely should be applied if there's any sort of a string set... That was the entire
+point... However I'm sure that other people might be able to use it and figure it out... hmm... for now let's have it called afterwards for something that wasn't specifically meant
+for generating the cycles for a particular set of strings... 
+
+Hmm... why is it saying the list object has no attribute called recurse? interesting... i'm not sure... i mean it was clearly passed a stream... or it was called
+on a stream itself... where is this exception being generated? inside the music21 library or something from my code? ahh... it's because it's a list of streams... not a stream of
+streams... Now to verifiy everytrhing is being generated correctly...
+
+04/15/2021
+Hmm... It seems as if the range checking didn't get this chord here... Hmm... So when I generate it in isolation the transposition occurs, but not when doing the full string set...
+I wonder why... Perhaps placement in the generation function? Hmm... I should give my hands a rest for a bit and then I can resume verifying all these different chord progressions...
+I was getting the tingley sensation a bit...
+
+04/17/2021
+Aha! Found an error in the 2/7 generated forthe 5-4-3 string set... The last chord is an octave lower than it should be... I think I see the error here... The tonic triad attached 
+to the end doesn't go through any sort of error checking to make sure it is within range... I should do that...
+
+So what would be some good ways to showcase what this software can generate?
+ 1. Examples of each of the different cycle types without any sort of range checking
+	Cycle 2/7
+	Cycle 5/4
+	Cycle 3/6
+ 2. Take one of the examples and apply it to different string sets to show how it can be applied
+ 3. Generate a drop 2 version of one of the voicings
+ 4. Apply this to the different forms available for the guitar string sets
