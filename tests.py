@@ -275,7 +275,7 @@ def generate_drop2_B_form_45_cycles_for_all_string_sets_test():
     voicing = Voicing.Drop2_B_form
     cycle_pairs = generate_cycle_pairs_for_all_string_sets(root_scale, tonic, pair_type, voicing)
     for pair in cycle_pairs:
-        write_cycle_to_xml(pair, "C:\\Temp\\Chord_scale_testing\\")
+        write_cycle_to_xml(pair, ".\\Examples\\")
 
 
 def generate_closed_36_cycles_for_all_string_sets_test():
@@ -285,7 +285,7 @@ def generate_closed_36_cycles_for_all_string_sets_test():
     voicing = Voicing.Closed
     cycle_pairs = generate_cycle_pairs_for_all_string_sets(root_scale, tonic, pair_type, voicing)
     for pair in cycle_pairs:
-        write_cycle_to_xml(pair, "C:\\Temp\\Chord_scale_testing\\")
+        write_cycle_to_xml(pair, ".\\Examples\\")
 
 
 def generate_closed_27_cycles_for_all_string_sets_test():
@@ -295,7 +295,7 @@ def generate_closed_27_cycles_for_all_string_sets_test():
     voicing = Voicing.Closed
     cycle_pairs = generate_cycle_pairs_for_all_string_sets(root_scale, tonic, pair_type, voicing)
     for pair in cycle_pairs:
-        write_cycle_to_xml(pair, "C:\\Temp\\Chord_scale_testing\\")
+        write_cycle_to_xml(pair, ".\\Examples\\")
 
 
 def generate_closed_45_cycles_for_all_string_sets_test():
@@ -305,7 +305,7 @@ def generate_closed_45_cycles_for_all_string_sets_test():
     voicing = Voicing.Closed
     cycle_pairs = generate_cycle_pairs_for_all_string_sets(root_scale, tonic, pair_type, voicing)
     for pair in cycle_pairs:
-        write_cycle_to_xml(pair, "C:\\Temp\\Chord_scale_testing\\")
+        write_cycle_to_xml(pair, ".\\Examples\\")
 
 
 def drop2_542_cycle36_test():
@@ -419,12 +419,47 @@ def ensure_unique_chords_test():
     cycle.show()
 
 
-def cycle36_a_harmonic_minor_test():
+def generate_examples():
+    output_dir = ".\\Examples\\"
+
+    # Example 1 - cycle 2/7 for C major
+    sc = scale.MajorScale('C')
+    tonic_triad = chord.Chord(sc.pitchesFromScaleDegrees([1, 3, 5], 'C5', 'B5'))
+    cycle = generate_cycle_pair(sc, tonic_triad, "2/7")
+    cycle.insert(0, key.KeySignature(0))
+    cycle.metadata = metadata.Metadata()
+    cycle.metadata.title = "Example 1 - Cycle 2/7 in C Major"
+    cycle.write("MusicXML", output_dir + "Example 1")
+
+    # Example 2 - cycle 4/5 for D major
+    sc = scale.MajorScale('D')
+    tonic_triad = chord.Chord(sc.pitchesFromScaleDegrees([1, 3, 5], 'D4', 'C5'))
+    cycle = generate_cycle_pair(sc, tonic_triad, "4/5")
+    cycle.insert(0, key.KeySignature(2))
+    cycle.metadata = metadata.Metadata()
+    cycle.metadata.title = "Example 2 - Cycle 4/5 in D Major"
+    cycle.write("MusicXML", output_dir + "Example 2")
+
+    # Example 3 - cycle 3/6 for A harmonic minor
     sc = scale.HarmonicMinorScale('A')
     tonic_triad = chord.Chord(sc.pitchesFromScaleDegrees([1, 3, 5], 'A4', 'G5'))
     cycle = generate_cycle_pair(sc, tonic_triad, "3/6")
     cycle.insert(0, key.KeySignature(0))
-    cycle.show()
+    cycle.metadata = metadata.Metadata()
+    cycle.metadata.title = "Example 3 - Cycle 3/6 in A Harmonic Minor"
+    cycle.write("MusicXML", output_dir + "Example 3")
+
+    # Example 4 - cycle 3/6 for C major but with drop 2 chords
+    tonic = 'C'
+    sc = scale.MajorScale(tonic)
+    root = sc.pitchFromDegree(1)
+    tonic_triad = chord.Chord([root, root.transpose(7), root.transpose(16)])
+    cycle = generate_cycle_pair(sc, tonic_triad, "3/6", voicing_type=Voicing.Drop2_A_form)
+    cycle.insert(0, key.KeySignature(0))
+    cycle.metadata = metadata.Metadata()
+    cycle.metadata.title = "Example 4 - Cycle 3/6 in C Major\nDrop 2 voicings"
+    cycle.write("MusicXML", output_dir + "Example 4")
+
 
 # compare_chords_test()
 # find_lowest_chord_test()
@@ -451,12 +486,13 @@ def cycle36_a_harmonic_minor_test():
 # drop2_532_cycle36_test()
 # drop2_431_cycle36_test()
 # closed_543_cycle27_test()
-generate_drop2_A_form_36_cycles_for_all_string_sets_test()
-generate_drop2_A_form_27_cycles_for_all_string_sets_test()
-generate_drop2_A_form_45_cycles_for_all_string_sets_test()
-generate_drop2_B_form_36_cycles_for_all_string_sets_test()
-generate_drop2_B_form_27_cycles_for_all_string_sets_test()
-generate_drop2_B_form_45_cycles_for_all_string_sets_test()
-generate_closed_36_cycles_for_all_string_sets_test()
-generate_closed_27_cycles_for_all_string_sets_test()
-generate_closed_45_cycles_for_all_string_sets_test()
+# generate_drop2_A_form_36_cycles_for_all_string_sets_test()
+# generate_drop2_A_form_27_cycles_for_all_string_sets_test()
+# generate_drop2_A_form_45_cycles_for_all_string_sets_test()
+# generate_drop2_B_form_36_cycles_for_all_string_sets_test()
+# generate_drop2_B_form_27_cycles_for_all_string_sets_test()
+# generate_drop2_B_form_45_cycles_for_all_string_sets_test()
+# generate_closed_36_cycles_for_all_string_sets_test()
+# generate_closed_27_cycles_for_all_string_sets_test()
+# generate_closed_45_cycles_for_all_string_sets_test()
+generate_examples()

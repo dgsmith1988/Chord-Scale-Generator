@@ -862,3 +862,5 @@ So what would be some good ways to showcase what this software can generate?
  2. Take one of the examples and apply it to different string sets to show how it can be applied
  3. Generate a drop 2 version of one of the voicings
  4. Apply this to the different forms available for the guitar string sets
+ 
+Hmm... The drop 2 functionality doesn't work with this modified tonality... Damn... Perhaps it has to do with the string sets... I'm not sure...
