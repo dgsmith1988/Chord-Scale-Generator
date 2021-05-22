@@ -10,9 +10,9 @@ If you're interested in the theory behind how this works I've included my worklo
 # Examples
 I've included some examples in the "\Examples" directory to help illustrate things. The code to generate these can be found in tests.py in the "generate_examples()" function as well as any of the other functions which start with "generate". The basic examples are the following:
 
-Example 1 - Cycle 2/7 in C major
-Example 2 - Cycle 4/5 in D major
-Example 3 - Cycle 3/6 in A harmonic minor
-Example 4 - Cycle 3/6 in C Major - Drop 2 voicings
+* Example 1 - Cycle 2/7 in C major
+* Example 2 - Cycle 4/5 in D major
+* Example 3 - Cycle 3/6 in A harmonic minor
+* Example 4 - Cycle 3/6 in C Major - Drop 2 voicings
 
 The other examples are a full set of of all the different string sets/chord voicings/cycle types in C Major.
