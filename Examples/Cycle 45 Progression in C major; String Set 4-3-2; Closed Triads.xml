@@ -10,7 +10,7 @@ String Set: 4-3-2; Closed Triads</movement-title>
   <identification>
     <creator type="composer">Graham Smith</creator>
     <encoding>
-      <encoding-date>2021-04-21</encoding-date>
+      <encoding-date>2021-05-21</encoding-date>
       <software>music21 v.6.5.0</software>
       <supports attribute="new-system" element="print" type="yes" value="yes" />
     </encoding>
@@ -25,12 +25,12 @@ String Set: 4-3-2; Closed Triads</movement-title>
     </scaling>
   </defaults>
   <part-list>
-    <score-part id="P9096d9b21ae63dd629a8427acca04305">
+    <score-part id="Pba2a23aa922e158b0a8d9663e85c3bb5">
       <part-name />
     </score-part>
   </part-list>
   <!--=========================== Part 1 ===========================-->
-  <part id="P9096d9b21ae63dd629a8427acca04305">
+  <part id="Pba2a23aa922e158b0a8d9663e85c3bb5">
     <!--========================= Measure 1 ==========================-->
     <measure number="1">
       <attributes>
