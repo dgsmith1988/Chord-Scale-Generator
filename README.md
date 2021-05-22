@@ -1,5 +1,5 @@
 # Chord-Scale-Generator
-This is a tool for generate different chord scale sequences that can be used for study/practice. The idea came about after completing Chris Buono's TrueFire Course for "Triad Chord Scales" (https://truefire.com/guitar-gym/triad-chord-scales-major/c753). I quite liked the concept but didn't want to have to manually write out the different chord scales for each different key so I wrote a piece of software to automate the task. On the way I also expanded it to support drop 2 triads (know as "spread triads" in some circles) as well as support for other scale types (like harmonic minor or melodic minor). Code is also included to enforce the range conditions for particular string sets. This makes it so only one voicing for each chord will appear in the cycle and you won't get any voicing being an octave higher/lower than any other (similar to what Chris does in his course). The range restrictions don't need to be used if you don't want and theoretically could be adapted for any other instrument (stringed or not).
+This is a tool for generate different chord scale sequences that can be used for study/practice. The idea came about after completing Chris Buono's TrueFire Course for ["Triad Chord Scales"](https://truefire.com/guitar-gym/triad-chord-scales-major/c753). I quite liked the concept but didn't want to have to manually write out the different chord scales for each different key so I wrote a piece of software to automate the task. On the way I also expanded it to support drop 2 triads (know as "spread triads" in some circles) as well as support for other scale types (like harmonic minor or melodic minor). Code is also included to enforce the range conditions for particular string sets. This makes it so only one voicing for each chord will appear in the cycle and you won't get any voicing being an octave higher/lower than any other (similar to what Chris does in his course). The range restrictions don't need to be used if you don't want and theoretically could be adapted for any other instrument (stringed or not).
 
 The output files are MusicXML so you need something like MuseScore to read them.
 
@@ -12,9 +12,9 @@ This could easily be expanded to 7th chords (something I plan to take a look at)
 # Examples
 I've included some examples in the "\Examples" directory to help illustrate things. The code to generate these can be found in tests.py in the "generate_examples()" function as well as any of the other functions which start with "generate". The basic examples are the following:
 
-* Example 1 - Cycle 2/7 in C major
-* Example 2 - Cycle 4/5 in D major
-* Example 3 - Cycle 3/6 in A harmonic minor
+* Example 1 - Cycle 2/7 in C Major
+* Example 2 - Cycle 4/5 in D Major
+* Example 3 - Cycle 3/6 in A Harmonic Minor
 * Example 4 - Cycle 3/6 in C Major - Drop 2 voicings
 
 The other examples are a full set of of all the different string sets/chord voicings/cycle types in C Major.
