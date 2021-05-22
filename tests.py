@@ -225,7 +225,7 @@ def generate_drop2_A_form_36_cycles_for_all_string_sets_test():
     voicing = Voicing.Drop2_A_form
     cycle_pairs = generate_cycle_pairs_for_all_string_sets(root_scale, tonic, pair_type, voicing)
     for pair in cycle_pairs:
-        write_cycle_to_xml(pair, "C:\\Temp\\Chord_scale_testing\\")
+        write_cycle_to_xml(pair, ".\\Examples\\")
 
 
 def generate_drop2_A_form_27_cycles_for_all_string_sets_test():
@@ -235,7 +235,7 @@ def generate_drop2_A_form_27_cycles_for_all_string_sets_test():
     voicing = Voicing.Drop2_A_form
     cycle_pairs = generate_cycle_pairs_for_all_string_sets(root_scale, tonic, pair_type, voicing)
     for pair in cycle_pairs:
-        write_cycle_to_xml(pair, "C:\\Temp\\Chord_scale_testing\\")
+        write_cycle_to_xml(pair, ".\\Examples\\")
 
 
 def generate_drop2_A_form_45_cycles_for_all_string_sets_test():
@@ -245,7 +245,7 @@ def generate_drop2_A_form_45_cycles_for_all_string_sets_test():
     voicing = Voicing.Drop2_A_form
     cycle_pairs = generate_cycle_pairs_for_all_string_sets(root_scale, tonic, pair_type, voicing)
     for pair in cycle_pairs:
-        write_cycle_to_xml(pair, "C:\\Temp\\Chord_scale_testing\\")
+        write_cycle_to_xml(pair, ".\\Examples\\")
 
 
 def generate_drop2_B_form_36_cycles_for_all_string_sets_test():
@@ -255,7 +255,7 @@ def generate_drop2_B_form_36_cycles_for_all_string_sets_test():
     voicing = Voicing.Drop2_B_form
     cycle_pairs = generate_cycle_pairs_for_all_string_sets(root_scale, tonic, pair_type, voicing)
     for pair in cycle_pairs:
-        write_cycle_to_xml(pair, "C:\\Temp\\Chord_scale_testing\\")
+        write_cycle_to_xml(pair, ".\\Examples\\")
 
 
 def generate_drop2_B_form_27_cycles_for_all_string_sets_test():
@@ -265,7 +265,7 @@ def generate_drop2_B_form_27_cycles_for_all_string_sets_test():
     voicing = Voicing.Drop2_B_form
     cycle_pairs = generate_cycle_pairs_for_all_string_sets(root_scale, tonic, pair_type, voicing)
     for pair in cycle_pairs:
-        write_cycle_to_xml(pair, "C:\\Temp\\Chord_scale_testing\\")
+        write_cycle_to_xml(pair, ".\\Examples\\")
 
 
 def generate_drop2_B_form_45_cycles_for_all_string_sets_test():
@@ -486,13 +486,13 @@ def generate_examples():
 # drop2_532_cycle36_test()
 # drop2_431_cycle36_test()
 # closed_543_cycle27_test()
-# generate_drop2_A_form_36_cycles_for_all_string_sets_test()
-# generate_drop2_A_form_27_cycles_for_all_string_sets_test()
-# generate_drop2_A_form_45_cycles_for_all_string_sets_test()
-# generate_drop2_B_form_36_cycles_for_all_string_sets_test()
-# generate_drop2_B_form_27_cycles_for_all_string_sets_test()
-# generate_drop2_B_form_45_cycles_for_all_string_sets_test()
-# generate_closed_36_cycles_for_all_string_sets_test()
-# generate_closed_27_cycles_for_all_string_sets_test()
-# generate_closed_45_cycles_for_all_string_sets_test()
+generate_drop2_A_form_36_cycles_for_all_string_sets_test()
+generate_drop2_A_form_27_cycles_for_all_string_sets_test()
+generate_drop2_A_form_45_cycles_for_all_string_sets_test()
+generate_drop2_B_form_36_cycles_for_all_string_sets_test()
+generate_drop2_B_form_27_cycles_for_all_string_sets_test()
+generate_drop2_B_form_45_cycles_for_all_string_sets_test()
+generate_closed_36_cycles_for_all_string_sets_test()
+generate_closed_27_cycles_for_all_string_sets_test()
+generate_closed_45_cycles_for_all_string_sets_test()
 generate_examples()
