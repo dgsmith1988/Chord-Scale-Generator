@@ -1,3 +1,5 @@
+![Cycle 4](Images/Cycle4.PNG)
+
 # Chord Scale/Cycle Generator
 This is a tool for generate different chord scale sequences that can be used for study/practice. The idea came about after completing Chris Buono's TrueFire Course for ["Triad Chord Scales"](https://truefire.com/guitar-gym/triad-chord-scales-major/c753). I quite liked the concept but didn't want to have to manually write out the different chord scales for each different key so I wrote a piece of software to automate the task. On the way I also expanded it to support drop 2 triads (know as "spread triads" in some circles) as well as support for other scale types (like harmonic minor or melodic minor). Code is also included to enforce the range conditions for particular string sets. This makes it so only one voicing for each chord will appear in the cycle and you won't get any voicing being an octave higher/lower than any other (similar to what Chris does in his course). The range restrictions don't need to be used if you don't want and theoretically could be adapted for any other instrument (stringed or not).
 
