@@ -3,7 +3,7 @@ This is a tool for generate different chord scale sequences that can be used for
 
 Code is also included to enforce the range conditions based on arbitary ranges or pre-defined string ranges. This makes it so only one voicing for each chord will appear in the cycle and you won't get any voicing being an octave higher/lower than any other. The range restrictions aren't mandatory and theoretically could be adapted for any other instrument (stringed or not) beyond the guitar as they're currently written for.
 
-Output files are MusicXML so you need something like MuseScore to read them.
+Output files are MusicXML so you need something like [MuseScore](https://musescore.org/) to read them. The code also makes heavy use of the [music21](https://web.mit.edu/music21/) library.
 
 # Theory
 So how does this work? All the software really does is repeatedly apply a series of voice leading patterns to produce different types of chord progressions. The default progressions are classified by the root motion between successive chords (but could be expanded to any set of criteria if desired). In a cycle 2 progression the root motion occurs in seconds. In a cycle 4 progression the root motion occurs in 5ths. You can have cycle 2, 3, 4, 5, 6, or 7 progressions (as those are all the basic distances for the intervals).
@@ -100,4 +100,4 @@ More diverse examples can be found in the "\Examples" directory to help illustra
 The other examples are a full set of of all the different string sets/chord voicings/cycle types in C Major.
 
 # Inspriation
-The idea came about after completing Chris Buono's TrueFire Course for ["Triad Chord Scales"](https://truefire.com/guitar-gym/triad-chord-scales-major/c753). I quite liked the concept but didn't want to have to manually write out the different chord scales for each different key and string set so I wrote a piece of software to automate the task for me. Along the way I also expanded it to support drop 2 triads (know as "spread triads" in some circles) as well as support for other scale types (like harmonic minor or melodic minor). This software could be used to supplement the different exercises in his course so you could cover all the string sets and scale types you could think of.
+The idea came about after completing Chris Buono's TrueFire Course for [Triad Chord Scales](https://truefire.com/guitar-gym/triad-chord-scales-major/c753). I quite liked the concept but didn't want to have to manually write out the different chord scales for each different key and string set so I wrote a piece of software to automate the task for me. Along the way I also expanded it to support drop 2 triads (know as "spread triads" in some circles) as well as support for other scale types (like harmonic minor or melodic minor). This software could be used to supplement the different exercises in his course so you could cover all the string sets and scale types you could think of.
