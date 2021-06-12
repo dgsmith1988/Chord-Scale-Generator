@@ -864,3 +864,12 @@ So what would be some good ways to showcase what this software can generate?
  4. Apply this to the different forms available for the guitar string sets
  
 Hmm... The drop 2 functionality doesn't work with this modified tonality... Damn... Perhaps it has to do with the string sets... I'm not sure...
+
+*05/27/2021*
+Hmm... Okay... So why isn't the harmonic minor stuff working for the drop 2 scenario... Lets take another stab at that... Hmm... I think it might have to do with the that I'm passing
+in a closed triad as opposed to a drop2 voicing... Yup... It all seems to work now... horray! It's probably also worth developing the documentation a bit more to make it easier to
+understand for people much more easily...
+
+*06/11/2021*
+Okay... So what to do here in terms of being able to explain these ideas? It would be worth going through the basics here with some examples. Start with the basics of what a drop2
+cycle is and go through showing how you extracted out the different rules...

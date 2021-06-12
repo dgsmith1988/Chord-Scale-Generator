@@ -194,6 +194,26 @@ def cycle36_a_minor_test():
     cycle.show()
 
 
+def cycle36_drop2_a_harmonic_minor_test():
+    sc = scale.HarmonicMinorScale('A')
+    # tonic_triad = chord.Chord(sc.pitchesFromScaleDegrees([1, 3, 5], 'A4', 'G5'))
+    triad_root = pitch.Pitch("A4")
+    tonic_triad = chord.Chord([triad_root, triad_root.transpose(7), triad_root.transpose(15)])
+    cycle = generate_cycle_pair(sc, tonic_triad, "3/6", voicing_type=Voicing.Drop2_A_form)
+    cycle.insert(0, key.KeySignature(0))
+    cycle.show()
+
+
+def cycle36_drop2_a_minor_test():
+    sc = scale.MinorScale('A')
+    # tonic_triad = chord.Chord(sc.pitchesFromScaleDegrees([1, 3, 5], 'A4', 'G5'))
+    triad_root = pitch.Pitch("A4")
+    tonic_triad = chord.Chord([triad_root, triad_root.transpose(7), triad_root.transpose(15)])
+    cycle = generate_cycle_pair(sc, tonic_triad, "3/6", voicing_type=Voicing.Drop2_A_form)
+    cycle.insert(0, key.KeySignature(0))
+    cycle.show()
+
+
 def transpose_test():
     tonic = 'C'
     sc = scale.MajorScale(tonic)
@@ -461,6 +481,50 @@ def generate_examples():
     cycle.write("MusicXML", output_dir + "Example 4")
 
 
+def generate_readme_examples():
+    # cycle 2
+    sc = scale.MajorScale('C')
+    tonic_triad = chord.Chord(sc.pitchesFromScaleDegrees([1, 3, 5], 'C5', 'B5'))
+    cycle = generate_full_cycle(sc, tonic_triad, cycle2matrix)[0]
+    cycle.insert(0, key.KeySignature(0))
+    cycle.show()
+
+    # cycle 3
+    sc = scale.MajorScale('C')
+    tonic_triad = chord.Chord(sc.pitchesFromScaleDegrees([1, 3, 5], 'C5', 'B5'))
+    cycle = generate_full_cycle(sc, tonic_triad, cycle3matrix)[0]
+    cycle.insert(0, key.KeySignature(0))
+    cycle.show()
+
+    # cycle 4
+    sc = scale.MajorScale('C')
+    tonic_triad = chord.Chord(sc.pitchesFromScaleDegrees([1, 3, 5], 'C5', 'B5'))
+    cycle = generate_full_cycle(sc, tonic_triad, cycle4matrix)[0]
+    cycle.insert(0, key.KeySignature(0))
+    cycle.show()
+
+    # cycle 5
+    sc = scale.MajorScale('C')
+    tonic_triad = chord.Chord(sc.pitchesFromScaleDegrees([1, 3, 5], 'C5', 'B5'))
+    cycle = generate_full_cycle(sc, tonic_triad, cycle5matrix)[0]
+    cycle.insert(0, key.KeySignature(0))
+    cycle.show()
+
+    # cycle 6
+    sc = scale.MajorScale('C')
+    tonic_triad = chord.Chord(sc.pitchesFromScaleDegrees([1, 3, 5], 'C5', 'B5'))
+    cycle = generate_full_cycle(sc, tonic_triad, cycle6matrix)[0]
+    cycle.insert(0, key.KeySignature(0))
+    cycle.show()
+
+    # cycle 7
+    sc = scale.MajorScale('C')
+    tonic_triad = chord.Chord(sc.pitchesFromScaleDegrees([1, 3, 5], 'C5', 'B5'))
+    cycle = generate_full_cycle(sc, tonic_triad, cycle7matrix)[0]
+    cycle.insert(0, key.KeySignature(0))
+    cycle.show()
+
+
 # compare_chords_test()
 # find_lowest_chord_test()
 # ensure_unique_chords_test()
@@ -475,6 +539,8 @@ def generate_examples():
 # cycle36_Ab_test()
 # cycle36_a_harmonic_minor_test()
 # cycle36_a_minor_test()
+# cycle36_drop2_a_harmonic_minor_test()
+# cycle36_drop2_a_minor_test()
 # cycle36_arbitrary_scale_test()
 # transpose_test()
 # range_check_test()
@@ -486,13 +552,14 @@ def generate_examples():
 # drop2_532_cycle36_test()
 # drop2_431_cycle36_test()
 # closed_543_cycle27_test()
-generate_drop2_A_form_36_cycles_for_all_string_sets_test()
-generate_drop2_A_form_27_cycles_for_all_string_sets_test()
-generate_drop2_A_form_45_cycles_for_all_string_sets_test()
-generate_drop2_B_form_36_cycles_for_all_string_sets_test()
-generate_drop2_B_form_27_cycles_for_all_string_sets_test()
-generate_drop2_B_form_45_cycles_for_all_string_sets_test()
-generate_closed_36_cycles_for_all_string_sets_test()
-generate_closed_27_cycles_for_all_string_sets_test()
-generate_closed_45_cycles_for_all_string_sets_test()
-generate_examples()
+# generate_drop2_A_form_36_cycles_for_all_string_sets_test()
+# generate_drop2_A_form_27_cycles_for_all_string_sets_test()
+# generate_drop2_A_form_45_cycles_for_all_string_sets_test()
+# generate_drop2_B_form_36_cycles_for_all_string_sets_test()
+# generate_drop2_B_form_27_cycles_for_all_string_sets_test()
+# generate_drop2_B_form_45_cycles_for_all_string_sets_test()
+# generate_closed_36_cycles_for_all_string_sets_test()
+# generate_closed_27_cycles_for_all_string_sets_test()
+# generate_closed_45_cycles_for_all_string_sets_test()
+# generate_examples()
+# generate_readme_examples()
